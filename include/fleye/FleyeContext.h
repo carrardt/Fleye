@@ -9,6 +9,7 @@
 
 struct ImageProcessingState;
 struct FleyeContextInternal;
+struct FleyeRenderWindow;
 
 struct FleyeContext
 {
@@ -33,7 +34,8 @@ struct FleyeContext
    GLuint cameraTextureId;				// GL id of special texture fed with camera
 	
 	/* contains Dispmanx native window and EGL display/sruface/context */
-   struct FleyeRenderWindow* render_window;
+   FleyeRenderWindow* render_window;
+   FleyeRenderWindow* current_window;
    
    /* user env vars */
 	std::map<std::string,std::string> vars;

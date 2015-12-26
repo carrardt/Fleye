@@ -1,4 +1,5 @@
 #define UNIT (1.0/32.0)
+#define FILTER_TEX 1
 
 float greenMask(vec3 p)
 {
@@ -27,11 +28,14 @@ void main(void)
 {
 	vec2 texcoord = normalizedWindowCoord();
 	//texcoord.y = 1.0 - texcoord.y;
+#ifdef FILTER_TEX
 	vec3 ftex =( texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y-step.y*0.5) ).xyz
 			   + texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y+step.y*0.5) ).xyz
 			   + texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y-step.y*0.5) ).xyz
 			   + texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y+step.y*0.5) ).xyz ) * 0.25;
-			   
+#else
+	vec3 ftex = texture2D(tex,texcoord).xyz;
+#endif
 	float gm = greenMask(ftex) * UNIT;
 	float lm = laserMask(ftex) * UNIT;
 

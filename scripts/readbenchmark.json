@@ -1,0 +1,32 @@
+// green / red objects tracking
+{
+	"RenderBuffers" :
+	{
+		"readtest" : {}
+	}
+    ,
+    "GLShaders" :
+    {
+		"copy-offscreen" : {
+			"fragment-shader" : "passthru_fs" ,
+			"textures" : { "tex" : "CAMERA" } ,
+			"output" : "readtest"
+		}
+    }
+    ,
+    "CPUFunctions" :
+    {
+		"cpu-readtest" : {
+			"plugin" : "readtest" , 
+			"thread-id" : 0
+		}
+ 		,
+		"cpu-print-fps" : 
+		{ 
+			"plugin" : "printFPS" ,
+			"thread-id" : 0
+		}
+   }
+    ,
+    "ProcessingLoop" : [ "copy-offscreen", "cpu-readtest", "cpu-print-fps" ]
+}

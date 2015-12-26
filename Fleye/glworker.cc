@@ -34,6 +34,7 @@ int glworker_init(struct FleyeContext* ctx)
 	// create the main render window
 	ctx->render_window = new FleyeRenderWindow(ctx->x,ctx->y,ctx->width,ctx->height,egl_config_attribs);
 	assert( ctx->render_window != 0 );
+	ctx->current_window = ctx->render_window;
 
 	// create camera texture
     ctx->cameraTextureId = 0;
@@ -201,8 +202,6 @@ int glworker_redraw(FleyeContext* ctx)
 {
 	int step = 0;
 	int swapBuffers = 0;
-    FleyeRenderWindow* mainwin = ctx->render_window;
-    FleyeRenderWindow* renwin = mainwin;
 
 	//std::cout<<"glworker_redraw: mainwin "<<mainwin<<"\n";
 
@@ -231,21 +230,17 @@ int glworker_redraw(FleyeContext* ctx)
 				{
 					//std::cout<<"pass "<<i<<"\n";
 					FrameBufferObject* fbo = ps.shaderPass->fboPool[ i % fboPoolSize ];
-					FleyeRenderWindow* nextRenWin = fbo->render_window;
-					if( nextRenWin != renwin )
+					if( fbo->render_window != ctx->current_window )
 					{
 						//std::cout<<"context switch : "<<renwin<<" -> "<<nextRenWin<<"\n";
 						if(swapBuffers)
 						{
-							//std::cout<<"swap buffers on "<<renwin<<"\n";
-							glFlush();
-							glFinish();
-							eglSwapBuffers(renwin->display, renwin->surface);
+							eglSwapBuffers(ctx->current_window->display, ctx->current_window->surface);
 							swapBuffers = 0;
 						}
-						renwin = nextRenWin;
+						ctx->current_window = fbo->render_window;
 						//std::cout<<"make current on "<<renwin<<"\n";
-						eglMakeCurrent(renwin->display, renwin->surface, renwin->surface, renwin->context);
+						eglMakeCurrent(ctx->current_window->display, ctx->current_window->surface, ctx->current_window->surface, ctx->current_window->context);
 					}
 					apply_shader_pass( ctx, &ps, i, &swapBuffers);
 				}
@@ -287,21 +282,9 @@ int glworker_redraw(FleyeContext* ctx)
 
     GLCHK(glUseProgram(0));
 
-	if( mainwin != renwin )
-	{
-		//std::cout<<"final context switch "<<renwin<<" -> "<<mainwin<<"\n";
-		if(swapBuffers)
-		{
-			eglSwapBuffers(renwin->display, renwin->surface);
-			swapBuffers = 0;
-		}
-		renwin = mainwin;
-		eglMakeCurrent(renwin->display, renwin->surface, renwin->surface, renwin->context);
-	}
-
 	if(swapBuffers)
 	{
-		eglSwapBuffers(renwin->display, renwin->surface);
+		eglSwapBuffers(ctx->current_window->display, ctx->current_window->surface);
 	}
 	
 	++ ctx->frameCounter;

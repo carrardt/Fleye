@@ -18,7 +18,7 @@ struct FleyeRenderWindow
     EGLSurface 			surface;
     EGLContext 			context;
 
-  private:
+  /*private:*/
 
 	void create_egl_context(const EGLint * attribs, FleyeRenderWindow* sharedCtxWin);
 

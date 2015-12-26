@@ -19,16 +19,6 @@ struct l2CrossCenter : public FleyePlugin
 		std::cout<<"L2CrossCenter setup : render_buffer @"<<render_buffer<<"\n";
 	}
 
-#if 0
-#define DECLARE_MINMAX_STAT(x) uint32_t x##Min=256, x##Max=0
-#define UPDATE_MINMAX_STAT(v) if(v<v##Min) v##Min=v; else if(v>v##Max) v##Max=v
-#define PRINT_MINMAX_STAT(x) std::cout<<" "<<#x<<"=["<<x##Min<<';'<<x##Max<<']';
-#else
-#define DECLARE_MINMAX_STAT(x) do{}while(0)
-#define UPDATE_MINMAX_STAT(v) do{}while(0)
-#define PRINT_MINMAX_STAT(x) do{}while(0)
-#endif
-
 	void run(FleyeContext* ctx)
 	{
 		CpuWorkerState * state = & ctx->ip->cpu_tracking_state;
@@ -39,45 +29,30 @@ struct l2CrossCenter : public FleyePlugin
 		uint32_t obj1_count=0, obj2_count=0;
 		uint32_t obj1_L2max=1, obj2_L2max=1;
 		
-		DECLARE_MINMAX_STAT(u1);
-		DECLARE_MINMAX_STAT(r1);
-		DECLARE_MINMAX_STAT(u2);
-		DECLARE_MINMAX_STAT(r2);
-		
-		DECLARE_MINMAX_STAT(R);
-		DECLARE_MINMAX_STAT(G);
-		DECLARE_MINMAX_STAT(B);
-
 		for(uint32_t y=0;y<height;y++)
 		{
 			const uint32_t* p = base_ptr + y * width;
 			for(uint32_t x=0;x<width;x++)
 			{
 				uint32_t value = *(p++);
-				uint32_t R = ( value ) & 0x000000FF;
-				uint32_t G = ( value >> 8) & 0x000000FF;
+				uint32_t r = ( value >> 3) & 0x0000001F;
+				uint32_t u = ( value >> 11) & 0x0000001F;
 				uint32_t B = ( value >> 16) & 0x000000FF;
 				//uint32_t A = ( value >> 24) & 0x000000FF;
 				
-				UPDATE_MINMAX_STAT(R);
-				UPDATE_MINMAX_STAT(G);
-				UPDATE_MINMAX_STAT(B);
-
 				if( B != 0 )
 				{
+					uint32_t m = (r>u) ? r : u;
 					if( B<128 )
 					{
-						uint32_t r1 = R / 8;
-						uint32_t u1 = G / 8;
-						uint32_t m1 = (r1>u1) ? r1 : u1;
-						if( m1 > obj1_L2max )
+						if( m > obj1_L2max )
 						{ 
 							obj1_count = 0;
 							obj1_sumx = 0;
 							obj1_sumy = 0;
-							obj1_L2max = m1;
+							obj1_L2max = m;
 						}
-						if( m1 == obj1_L2max )
+						if( m == obj1_L2max )
 						{
 							obj1_sumx += x;
 							//if( r1 >= 1 ) obj1_sumx -= 1<<(r1-1);
@@ -85,22 +60,17 @@ struct l2CrossCenter : public FleyePlugin
 							//if( u1 >= 1 ) obj1_sumy -= 1<<(u1-1);
 							++ obj1_count;
 						}
-						UPDATE_MINMAX_STAT(u1);
-						UPDATE_MINMAX_STAT(r1);
 					}
 					else
 					{
-						uint32_t r2 = R / 8;
-						uint32_t u2 = G / 8;
-						uint32_t m2 = (r2>u2) ? r2 : u2;
-						if( m2 > obj2_L2max )
+						if( m > obj2_L2max )
 						{ 
 							obj2_count = 0;
 							obj2_sumx = 0;
 							obj2_sumy = 0; 
-							obj2_L2max=m2; 
+							obj2_L2max = m;
 						}
-						if( m2 == obj2_L2max )
+						if( m == obj2_L2max )
 						{
 							obj2_sumx += x;
 							//if( r2 >= 1 ) obj2_sumx -= 1<<(r2-1);
@@ -108,8 +78,6 @@ struct l2CrossCenter : public FleyePlugin
 							//if( u2 >= 1 ) obj2_sumy -= 1<<(u2-1);
 							++ obj2_count;
 						}
-						UPDATE_MINMAX_STAT(u2);
-						UPDATE_MINMAX_STAT(r2);
 					}
 				}
 			}

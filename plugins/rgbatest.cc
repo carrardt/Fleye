@@ -63,12 +63,15 @@ struct rgbatest : public FleyePlugin
 				UPDATE_MINMAX_STAT(a,x,y);
 			}
 		}
-		std::cout<<"size="<<width<<'x'<<height;
-		PRINT_MINMAX_STAT(r);
-		PRINT_MINMAX_STAT(g);
-		PRINT_MINMAX_STAT(b);
-		PRINT_MINMAX_STAT(a);
-		std::cout<<"                \r";
+		if( ctx->frameCounter%30 == 0 )
+		{
+			std::cout<<"size="<<width<<'x'<<height;
+			PRINT_MINMAX_STAT(r);
+			PRINT_MINMAX_STAT(g);
+			PRINT_MINMAX_STAT(b);
+			PRINT_MINMAX_STAT(a);
+			std::cout<<"                \r";
+		}
 	}
 };
 
