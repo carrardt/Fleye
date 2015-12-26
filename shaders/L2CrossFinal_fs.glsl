@@ -8,9 +8,8 @@
 
 float incrementL2( float c, float nbh )
 {
-	float nbhOk = clamp( sign(nbh-UNIT*0.5) , 0.0 , 1.0 );
-	float same = 1.0 - abs(sign(nbh-c));
-	return c + same*nbhOk*UNIT;
+	if( nbh>0.0 && nbh==c ) c+=UNIT;
+	return c;
 }
 
 void main(void)
@@ -26,16 +25,16 @@ void main(void)
 		
 	if( Tx_p<1.0 )
 	{
-		vec4 nbh = texture2D( tex, vec2(Tx_p,ty) );
-		C.x = incrementL2( C.x, nbh.x);
-		C.z = incrementL2( C.z, nbh.z);
+		vec4 nbh1 = texture2D( tex, vec2(Tx_p,ty) );
+		C.x = incrementL2( C.x, nbh1.x);
+		C.z = incrementL2( C.z, nbh1.z);
 	}
 
 	if( Ty_p<1.0 )
 	{
-		vec4 nbh = texture2D( tex, vec2(tx,Ty_p) );
-		C.y = incrementL2( C.y, nbh.y);
-		C.w = incrementL2( C.w, nbh.w);
+		vec4 nbh2 = texture2D( tex, vec2(tx,Ty_p) );
+		C.y = incrementL2( C.y, nbh2.y);
+		C.w = incrementL2( C.w, nbh2.w);
 	}
 
 	float Ar = C.x;

@@ -29,7 +29,7 @@ struct printFPS : public FleyePlugin
 	   {
 		  time_start = time_now;
 	   }
-	   else if (time_now - time_start > 1000)
+	   else if (time_now - time_start > 5000)
 	   {
 		  uint32_t frame_count = ctx->frameCounter - lastCount;
 		  float fps = (float) frame_count / ((time_now - time_start) / 1000.0f);
@@ -37,8 +37,9 @@ struct printFPS : public FleyePlugin
 		  time_start = time_now;
 		  std::ostringstream oss;
 		  int F = fps*100.0f;
-		  oss<<F*0.01f<<" FPS\nframe "<<ctx->frameCounter;
+		  oss<<F*0.01f<<" FPS";
 		  fpsText->setText( oss.str().c_str() );
+		  std::cout<<oss.str()<<"\n";
 	   }		
 	}
 
