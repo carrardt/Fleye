@@ -135,8 +135,7 @@ struct l2CrossCenter : public FleyePlugin
 			state->trackedObjects[ state->objectCount ++ ] = 1;
 		}
 
-		/*
-		if( ctx->frameCounter%30 == 0 )
+		/*if( ctx->frameCounter%30 == 0 )
 		{
 			PRINT_MINMAX_STAT(R);
 			PRINT_MINMAX_STAT(G);
@@ -147,10 +146,9 @@ struct l2CrossCenter : public FleyePlugin
 			PRINT_MINMAX_STAT(r2);
 			std::cout<<" c1="<<obj1_count<<" p="<<obj1_sumx<<','<<obj1_sumy;
 			std::cout<<" c2="<<obj2_count<<" p="<<obj2_sumx<<','<<obj2_sumy;
-			std::cout<<" T="<<targetPosX<<','<<targetPosY;
-			std::cout<<" L="<<laserPosX<<','<<laserPosY<<"\n";
-		}
-		*/
+			std::cout<<" T="<<state->objectCenter[0][0]<<','<<state->objectCenter[0][1];
+			std::cout<<" L="<<state->objectCenter[1][0]<<','<<state->objectCenter[1][1]<<"\n";
+		}*/
 	}
 };
 
