@@ -30,11 +30,19 @@ struct drawTrackingPos : public FleyePlugin
 		float N = m_track_svc->getTrackedObjects().size();
 		for( auto p : m_track_svc->getTrackedObjects() )
 		{
-			float x = ( p.second->posX - 0.5 ) * 2.0 ;
-			float y = ( p.second->posY - 0.5 ) * 2.0 ;
+			float W = p.second->weight;
+			if(W==0.0f) W=1.0f;
+			W = 1.0f/W;
+			float x = ( p.second->posX*W - 0.5f ) * 2.0f ;
+			float y = ( p.second->posY*W - 0.5f ) * 2.0f ;
 			float h = i / N;
-			//std::cout<<i<<" : x="<<x<<", y="<<y<<"\n";
+			//std::cout<<i<<" : x="<<x<<", y="<<y<<", W="<<W<< "\n";
 			drawCross(compiledShader,x,y,h);
+			p.second->priority = 0;
+			p.second->weight = 0;
+			p.second->area = 0;
+			p.second->posX = 0;
+			p.second->posY = 0;
 			++i;
 		}
 

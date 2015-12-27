@@ -19,7 +19,7 @@ void *cpuWorker(void *arg)
 	{
 		if( state->cpu_processing[ state->cpuFunc ] !=0 )
 		{
-			state->cpu_processing[ state->cpuFunc ]->run( ctx );
+			state->cpu_processing[ state->cpuFunc ]->run( ctx, state->tid + 1 );
 			
 			// signal that one more task has finished
 			ctx->postEndProcessingSem( state->tid );

@@ -73,7 +73,7 @@
 		"cpu-print-fps" : 
 		{ 
 			"plugin" : "printFPS" ,
-			"thread-id" : 1
+			"thread-id" : 2
 		}
 		,
 		"cpu-syncThread" :

@@ -21,8 +21,6 @@
     {
 		"cpu-rgbatest" : {
 			"plugin" : "rgbatest" , 
-			"setup" : "rgbatest_setup" ,
-			"run" : "rgbatest_run" ,
 			"thread-id" : 0
 		}
     }

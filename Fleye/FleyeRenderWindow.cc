@@ -37,18 +37,19 @@ FleyeRenderWindow::~FleyeRenderWindow()
 	if(read_back_buffer!=0) delete [] read_back_buffer;
 }
 
-uint8_t* FleyeRenderWindow::readBack(int &w, int& h)
+int FleyeRenderWindow::width()
 {
-	if(this->read_back_buffer == NULL)
-	{
-		w=0;
-		h=0;
-		return 0;
-	}
-	read_offscreen_image(this->fleye_window, this->read_back_buffer);
-	w = this->fleye_window->width;
-	h = this->fleye_window->height;
-	return this->read_back_buffer;
+	return this->fleye_window->width;
+}
+
+int FleyeRenderWindow::height()
+{
+	return this->fleye_window->height;
+}
+
+void FleyeRenderWindow::copyToBuffer(int x,int y, int w,int h)
+{
+	read_offscreen_image_rect(this->fleye_window,x,y,w,h,this->read_back_buffer);
 }
 
 void FleyeRenderWindow::create_egl_context(const EGLint * attribs, FleyeRenderWindow* sharedCtxWin)

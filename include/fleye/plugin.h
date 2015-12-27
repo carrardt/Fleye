@@ -18,7 +18,7 @@ class FleyePlugin
 	static FleyePlugin* plugin(FleyeContext* ctx,std::string name);
 
 	virtual void setup(FleyeContext* ctx) {}
-	virtual void run(FleyeContext* ctx) {}
+	virtual void run(FleyeContext* ctx,int) {}
 	virtual void draw(FleyeContext*,CompiledShader*,int) {}
 
   private:

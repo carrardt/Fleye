@@ -150,12 +150,17 @@ struct FleyeNativeWindow* create_offscreen_native_window(int x, int y, int width
 
 int read_offscreen_image(struct FleyeNativeWindow* fleye_win, uint8_t* dst_buffer)
 {
+   return read_offscreen_image_rect(fleye_win,0,0,fleye_win->width,fleye_win->height,dst_buffer);
+}
+
+int read_offscreen_image_rect(struct FleyeNativeWindow* fleye_win, int x,int y, int w,int h, uint8_t* dst_buffer)
+{
    VC_RECT_T dest_rect = {0,0,0,0};
    uint32_t dst_pitch = fleye_win->width * 4;
-   dest_rect.x = 0;
-   dest_rect.y = 0;
-   dest_rect.width = fleye_win->width;
-   dest_rect.height = fleye_win->height;
+   dest_rect.x = x;
+   dest_rect.y = y;
+   dest_rect.width = w;
+   dest_rect.height = h;
    vc_dispmanx_resource_read_data(fleye_win->win_res, &dest_rect, dst_buffer, dst_pitch);
    return 0;
 }

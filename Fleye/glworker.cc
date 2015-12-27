@@ -267,7 +267,7 @@ int glworker_redraw(FleyeContext* ctx)
 				if( tid <= 0 )
 				{
 					//printf("sync exec cpu step #%d\n",step);
-					ps.cpuPass->cpu_processing->run( ctx );
+					ps.cpuPass->cpu_processing->run( ctx, 0 );
 				}
 				else
 				{

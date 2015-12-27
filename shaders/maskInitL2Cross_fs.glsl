@@ -36,8 +36,13 @@ void main(void)
 #else
 	vec3 ftex = texture2D(tex,texcoord).xyz;
 #endif
+
 	float gm = greenMask(ftex) * UNIT;
 	float lm = laserMask(ftex) * UNIT;
+
+	/*vec2 p = texcoord-vec2(0.2,0.8);
+	gm = clamp( sign(0.01-dot(p,p)) , 0.0 , 1.0 ) * UNIT;
+	lm = 0.0;*/
 
 	gl_FragColor = vec4(gm,gm,lm,lm);
 }

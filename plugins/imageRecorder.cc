@@ -27,8 +27,11 @@ struct imageRecorder : public FleyePlugin
 	{
 		char tmp[128];
 		int width=0, height=0;
-		uint8_t* image = render_buffer->readBack(width,height);
+		width = render_buffer->width();
+		height = render_buffer->height();
+		const uint8_t* image = render_buffer->readBack();
 		uint32_t imgSize = width * height * 4;
+/*
 		for(uint32_t i=0;i<(width * height);i++)
 		{
 			uint8_t r = image[i*4+0];
@@ -40,7 +43,7 @@ struct imageRecorder : public FleyePlugin
 			image[i*4+2] = b;
 			image[i*4+3] = a;
 		}
-
+*/
 		sprintf(tmp,"/tmp/capture%04d.tga",ctx->frameCounter);
 		std::cout<<"write image @"<<(void*)image<<" ("<<width<<'x'<<height<<") to "<<tmp<<"\n";
 		FILE* fp = fopen(tmp,"w");

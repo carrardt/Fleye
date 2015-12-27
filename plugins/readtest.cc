@@ -21,10 +21,7 @@ struct readtest : public FleyePlugin
 
 	void run(FleyeContext* ctx)
 	{
-		int width=0, height=0;
-		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack(width,height);	
-		if( ctx->frameCounter%1024 == 0 )
-			std::cout<<"base_ptr="<<base_ptr<<", w="<<width<<", h="<<height<<"\n";
+		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack();	
 	}
 };
 

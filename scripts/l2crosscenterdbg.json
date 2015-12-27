@@ -52,7 +52,7 @@
 		"gpu-overlay" : {
 			"vertex-shader" : "zhue_vs" ,
 			"fragment-shader" : "color_fs" ,
-			"rendering" : { "plugin" : "l2CrossCenter" , "function" : "drawObjectPosition" }
+			"rendering" : "drawTrackingPos"
 		}
     }
     ,

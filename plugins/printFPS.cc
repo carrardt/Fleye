@@ -17,7 +17,7 @@ struct printFPS : public FleyePlugin
 		fpsText->setText("Please wait...");
 	}
 
-	void run(FleyeContext* ctx)
+	void run(FleyeContext* ctx,int threadId)
 	{
 	   long long time_now;
 	   struct timeval te;

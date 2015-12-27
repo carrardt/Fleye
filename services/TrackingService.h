@@ -6,18 +6,31 @@
 #include <iostream>
 #include "fleye/service.h"
 
+
 struct TrackedObject
 {
 	float posX,posY;
 	float speedX, speedY;
+	float area;
+	float weight;
+	uint32_t priority;
+	uint32_t timestamp;
 	const uint32_t objectId;
-	uint32_t timestamp; // logical time when object has been tracked for the last time
-	inline TrackedObject(uint32_t id) : posX(0.0f), posY(0.0f), speedX(0.0f), speedY(0.0f), objectId(id), timestamp(0) {}
+	inline TrackedObject(uint32_t id)
+		: posX(0.0f)
+		, posY(0.0f)
+		, speedX(0.0f)
+		, speedY(0.0f)
+		, area(0.0f)
+		, weight(0.0f)
+		, priority(0)
+		, timestamp(0)
+		, objectId(id) {}
 };
 
 class TrackingService : public FleyeService
 {
-  public:
+  public:  
 	inline TrackedObject* addTrackedObject(uint32_t id)
 	{
 		TrackedObject* t = new TrackedObject(id);
@@ -25,7 +38,7 @@ class TrackingService : public FleyeService
 		return t;
 	}
 
-	inline const std::map<uint32_t,TrackedObject*>& getTrackedObjects() const { return m_trackedObjects; };
+	inline std::map<uint32_t,TrackedObject*>& getTrackedObjects() { return m_trackedObjects; };
 	
   private:
 	std::map<uint32_t,TrackedObject*> m_trackedObjects;

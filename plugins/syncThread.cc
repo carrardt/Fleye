@@ -12,8 +12,9 @@ struct syncThread : public FleyePlugin
 		printf("syncThread plugin ready\n");
 	}
 
-	void syncThread_run(FleyeContext* ctx)
+	void syncThread_run(FleyeContext* ctx,int threadId)
 	{
+		assert( threadId == 0 );
 		for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
 		{
 			CpuWorkerState * state = & ctx->ip->cpu_tracking_state[i];

@@ -26,7 +26,7 @@ struct FleyeNativeWindow
 extern struct FleyeNativeWindow* create_offscreen_native_window(int x, int y, int width, int height, int opacity);
 extern struct FleyeNativeWindow* create_native_window(int x, int y, int width, int height, int opacity);
 extern int read_offscreen_image(struct FleyeNativeWindow* fleye_win, uint8_t* dst_buffer);
+extern int read_offscreen_image_rect(struct FleyeNativeWindow* fleye_win, int x,int y, int w,int h, uint8_t* dst_buffer);
 extern void destroy_native_window(struct FleyeNativeWindow* fleye_win);
-
 
 #endif /* fleye_window */

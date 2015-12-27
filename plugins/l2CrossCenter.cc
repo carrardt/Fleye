@@ -1,3 +1,7 @@
+extern "C" {
+#include "interface/vcos/vcos.h"
+}
+
 #include "fleye/cpuworker.h"
 #include "fleye/plugin.h"
 #include "fleye/FleyeRenderWindow.h"
@@ -20,19 +24,34 @@ struct l2CrossCenter : public FleyePlugin
 		TrackingService* track_svc = TrackingService_instance();
 		obj1 = track_svc->addTrackedObject(0);
 		obj2 = track_svc->addTrackedObject(1);
+		
+		memset(&mutex,0,sizeof(mutex));
+		assert( vcos_mutex_create(&mutex,"l2CrossMutex") == VCOS_SUCCESS );
+		
 		std::cout<<"L2CrossCenter setup : render_buffer @"<<render_buffer<<", obj1@"<<obj1<<", obj2@"<<obj2<< "\n";
 	}
 
-	void run(FleyeContext* ctx)
+	void run(FleyeContext* ctx, int threadId)
 	{
-		int width=0, height=0;
-		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack(width,height);
+		int width = render_buffer->width();
+		int height = render_buffer->height();
+		
+		threadId -= 1; // we don't use the main thread (0)
+		int nThreads = PROCESSING_ASYNC_THREADS;
+		
+		int hStart = ( height * threadId ) / nThreads ;
+		int hEnd = ( height * (threadId+1) ) / nThreads ;
+		
+		render_buffer->copyToBuffer(0,hStart,width,hEnd-hStart);
+		const uint32_t* base_ptr = (const uint32_t*) render_buffer->getCopyBuffer();
+		//std::cout<<width<<"x"<<height<<"\n";
+		
 		uint32_t obj1_sumx=0,obj1_sumy=0;
 		uint32_t obj2_sumx=0,obj2_sumy=0;
 		uint32_t obj1_count=0, obj2_count=0;
 		int obj1_L2max=1, obj2_L2max=1;
 		
-		for(uint32_t y=0;y<height;y++)
+		for(uint32_t y=hStart;y<hEnd;y++)
 		{
 			const uint32_t* p = base_ptr + y*width;
 			for(uint32_t x=0;x<width;x++)
@@ -55,7 +74,7 @@ struct l2CrossCenter : public FleyePlugin
 						if( m == obj1_L2max )
 						{
 							obj1_sumx += x;
-							obj1_sumy += y;
+							obj1_sumy += (height-y-1);
 							++ obj1_count;
 						}
 					}
@@ -71,33 +90,72 @@ struct l2CrossCenter : public FleyePlugin
 						if( m == obj2_L2max )
 						{
 							obj2_sumx += x;
-							obj2_sumy += y;
+							obj2_sumy += (height-y-1);
 							++ obj2_count;
 						}
 					}
 				}
 			}
 		}
-			
+		
+		
+		vcos_mutex_lock(&mutex);
+
 		if(obj1_count>0)
 		{
-			float wx = (float)obj1_sumx / (float)obj1_count;
-			float wy = (float)obj1_sumy / (float)obj1_count;
-			obj1->posX = wx / (float)width;
-			obj1->posY = 1.0f - wy / (float)height;
+			float W = (float)obj1_count;
+			float wx = (float)obj1_sumx ;
+			float wy = (float)obj1_sumy ;
+			float nx = wx / (float)width;
+			float ny = wy / (float)height;
+			if( obj1_L2max > obj1->priority )
+			{
+				obj1->priority = obj1_L2max;
+				obj1->posX = 0.0f;
+				obj1->posY = 0.0f;
+				obj1->area = 0.0f;
+				obj1->weight = 0.0f;
+			}
+			if( obj1_L2max == obj1->priority )
+			{
+				obj1->posX += nx ;
+				obj1->posY += ny ;
+				obj1->area += W;
+				obj1->weight += W;
+				//std::cout<<"add "<<nx<<','<<ny<<','<<W<<"\n";
+			}
 			obj1->timestamp = ctx->frameCounter;
 		}
 
 		if(obj2_count>0)
 		{
-			float wx = (float)obj2_sumx / (float)obj2_count;
-			float wy = (float)obj2_sumy / (float)obj2_count;
-			obj2->posX = wx / (float)width;
-			obj2->posY = 1.0f - wy / (float)height;
+			float W = (float)obj2_count;
+			float wx = (float)obj2_sumx ;
+			float wy = (float)obj2_sumy ;
+			float nx = wx / (float)width;
+			float ny = wy / (float)height;
+			if( obj2_L2max > obj2->priority )
+			{
+				obj2->priority = obj2_L2max;
+				obj2->posX = 0.0f;
+				obj2->posY = 0.0f;
+				obj2->area = 0.0f;
+				obj2->weight = 0.0f;
+			}
+			if( obj2_L2max == obj2->priority )
+			{
+				obj2->posX += nx ;
+				obj2->posY += ny ;
+				obj2->area += W;
+				obj2->weight += W;
+			}
 			obj2->timestamp = ctx->frameCounter;
 		}
+		
+		vcos_mutex_unlock(&mutex);
 	}
 	
+	VCOS_MUTEX_T mutex;
 	FleyeRenderWindow* render_buffer;
 	TrackedObject* obj1;
 	TrackedObject* obj2;

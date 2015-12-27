@@ -37,8 +37,9 @@ struct rgbatest : public FleyePlugin
 
 	void run(FleyeContext* ctx)
 	{
-		int width=0, height=0;
-		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack(width,height);
+		int width = render_buffer->width();
+		int height = render_buffer->height();
+		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack();
 		
 		//std::cout<<"base_ptr="<<base_ptr<<", w="<<width<<", h="<<height<<"\n";
 		DECLARE_MINMAX_STAT(r);
