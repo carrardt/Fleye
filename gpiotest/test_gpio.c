@@ -34,10 +34,10 @@ int init_gpio()
 
 void gpio_write_xy_i(unsigned int xi, unsigned int yi, int laserSwitch)
 {
-	unsigned int i;
-	unsigned int set_mask = 0;
-	unsigned int clr_mask = 0;
-	unsigned int  bits;
+	uint32_t i;
+	uint32_t set_mask = 0;
+	uint32_t clr_mask = 0;
+	uint32_t bits;
 	
 	if( xi>=1024 ) xi=1023;
 	if( yi>=1024 ) yi=1023;
@@ -46,7 +46,7 @@ void gpio_write_xy_i(unsigned int xi, unsigned int yi, int laserSwitch)
 	
 	for(i=0;i<20;++i)
 	{
-		if( (bits>>i) & 1 ) { set_mask |= 1<<i; }
+		if( bits&(1<<i) != 0 ) { set_mask |= 1<<i; }
 		else { clr_mask |= 1<<i; }
 	}
 

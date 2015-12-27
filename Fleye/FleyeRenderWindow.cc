@@ -11,7 +11,7 @@ FleyeRenderWindow::FleyeRenderWindow(int x,int y,int width, int height, const EG
 	{
 		this->fleye_window = create_offscreen_native_window(0,0,width,height,255);
 		this->read_back_buffer = 0;
-		posix_memalign((void**) & this->read_back_buffer, 64, width*height*4);
+		posix_memalign((void**) & this->read_back_buffer, 4096, width*height*4);
 		memset(this->read_back_buffer,0,width*height*4);
 	}
 	else 

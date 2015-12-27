@@ -16,6 +16,10 @@ struct FleyeContext
    FleyeContext();
    ~FleyeContext();
    void setIntegerVar(const std::string& key, int value);
+	int postStartProcessingSem( int tid );
+	int waitStartProcessingSem( int tid );
+	int postEndProcessingSem( int tid );
+	int waitEndProcessingSem( int tid );
 
 	
    /* Display rectangle for the native window */
@@ -48,10 +52,5 @@ struct FleyeContext
    
    bool verbose;
 };
-
-extern int postStartProcessingSem( struct FleyeContext* ctx );
-extern int waitStartProcessingSem( struct FleyeContext* ctx );
-extern int postEndProcessingSem( struct FleyeContext* ctx );
-extern int waitEndProcessingSem( struct FleyeContext* ctx );
 
 #endif

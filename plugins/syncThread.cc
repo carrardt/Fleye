@@ -14,16 +14,17 @@ struct syncThread : public FleyePlugin
 
 	void syncThread_run(FleyeContext* ctx)
 	{
-		CpuWorkerState * state = & ctx->ip->cpu_tracking_state;
-		
-		int nToWait = state->nAvailCpuFuncs - state->nFinishedCpuFuncs;
-		while( nToWait > 0 )
+		for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
 		{
-			waitEndProcessingSem( ctx );
-			// vcos_semaphore_wait( & state->end_processing_sem );
-			-- nToWait;
+			CpuWorkerState * state = & ctx->ip->cpu_tracking_state[i];
+			int nToWait = state->nAvailCpuFuncs - state->nFinishedCpuFuncs;
+			while( nToWait > 0 )
+			{
+				ctx->waitEndProcessingSem( i );
+				-- nToWait;
+			}
+			state->nFinishedCpuFuncs = state->nAvailCpuFuncs; 
 		}
-		state->nFinishedCpuFuncs = state->nAvailCpuFuncs; 
 	}
 };
 

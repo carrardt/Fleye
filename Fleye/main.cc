@@ -28,63 +28,37 @@ struct FleyeContextInternal
    MMAL_BUFFER_HEADER_T *image_buf;  /// MMAL buffer currently bound to texture(s)
 
    /* cpu worker thread */
-   VCOS_THREAD_T cpuTrackingThread;
+   VCOS_THREAD_T cpuTrackingThread[PROCESSING_ASYNC_THREADS];
 
    /* synchronization semaphores between cpu workers and gpu worker */
-   VCOS_SEMAPHORE_T start_processing_sem;
-   VCOS_SEMAPHORE_T end_processing_sem;
+   VCOS_SEMAPHORE_T start_processing_sem[PROCESSING_ASYNC_THREADS];
+   VCOS_SEMAPHORE_T end_processing_sem[PROCESSING_ASYNC_THREADS];
 };
 
-int postStartProcessingSem( struct FleyeContext* ctx )
+int FleyeContext::postStartProcessingSem( int tid )
 {
-	vcos_semaphore_post( & ctx->priv->start_processing_sem );
+	vcos_semaphore_post( & priv->start_processing_sem[tid] );
 }
 
-int waitStartProcessingSem( struct FleyeContext* ctx )
+int FleyeContext::waitStartProcessingSem( int tid )
 {
-	vcos_semaphore_wait( & ctx->priv->start_processing_sem );
+	vcos_semaphore_wait( & priv->start_processing_sem[tid] );
 }
 
-int postEndProcessingSem( struct FleyeContext* ctx )
+int FleyeContext::postEndProcessingSem( int tid )
 {
-	vcos_semaphore_post( & ctx->priv->end_processing_sem );
+	vcos_semaphore_post( & priv->end_processing_sem[tid] );
 }
 
-int waitEndProcessingSem( struct FleyeContext* ctx )
+int FleyeContext::waitEndProcessingSem( int tid )
 {
-	vcos_semaphore_wait( & ctx->priv->end_processing_sem );
-}
-
-static void update_fps(FleyeContext* ctx)
-{
-   static long long time_start = 0;
-   static uint32_t lastCount = 0;
-   long long time_now;
-   struct timeval te;
-   float fps;
-
-   gettimeofday(&te, NULL);
-   time_now = te.tv_sec * 1000LL + te.tv_usec / 1000;
-
-   if (time_start == 0)
-   {
-      time_start = time_now;
-   }
-   else if (time_now - time_start > 1000)
-   {
-	  uint32_t frame_count = ctx->frameCounter - lastCount;
-      fps = (float) frame_count / ((time_now - time_start) / 1000.0);
-      lastCount = ctx->frameCounter;
-      time_start = time_now;
-      ctx->setIntegerVar("FPS",fps);
-   }
+	vcos_semaphore_wait( & priv->end_processing_sem[tid] );
 }
 
 static int user_process(void* user_data)
 {
 	FleyeContext* ctx = (FleyeContext*) user_data;
 	glworker_redraw( ctx );
-	update_fps(ctx);
 	return 0;
 }
 
@@ -94,26 +68,35 @@ static int user_initialize(void* user_data)
 	int rc=0;
 	
 	// create semaphores for CPU Worker / GL Worker synchronization
-	VCOS_SEMAPHORE_T* sem;
-	sem = & ctx->priv->start_processing_sem;
-	memset(sem,0,sizeof(*sem));
-	rc = vcos_semaphore_create( sem, "start_processing_sem", 1);
-	assert( rc == VCOS_SUCCESS );
+	for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+	{
+		std::ostringstream startName; startName<<"StartSem"<<i;
+		VCOS_SEMAPHORE_T* sem;
+		sem = & ctx->priv->start_processing_sem[i];
+		memset(sem,0,sizeof(*sem));
+		rc = vcos_semaphore_create( sem, startName.str().c_str() , 1);
+		assert( rc == VCOS_SUCCESS );
 
-	sem = & ctx->priv->end_processing_sem;
-	memset(sem,0,sizeof(*sem));
-	rc = vcos_semaphore_create( sem,"end_processing_sem", 1);
-	assert( rc == VCOS_SUCCESS );
+		std::ostringstream endName; endName<<"EndSem"<<i;
+		sem = & ctx->priv->end_processing_sem[i];
+		memset(sem,0,sizeof(*sem));
+		rc = vcos_semaphore_create( sem, endName.str().c_str() , 1);
+		assert( rc == VCOS_SUCCESS );
+	}	
 	
 	// initialize GL and read processinf script
 	rc = glworker_init(ctx);
 	assert(rc==0);
 	
-	// create the cpu worker thread
-	VCOS_THREAD_T* cpuThread = & ctx->priv->cpuTrackingThread;
-	memset(cpuThread,0,sizeof(*cpuThread));
-	rc = vcos_thread_create( cpuThread, "cpu_worker", NULL, cpuWorker, ctx );
-	assert (rc == VCOS_SUCCESS);
+	// create the cpu worker threadS
+	for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+	{
+		std::ostringstream threadName; threadName<<"CpuWorkerThread"<<i;
+		VCOS_THREAD_T* cpuThread = & ctx->priv->cpuTrackingThread[i];
+		memset(cpuThread,0,sizeof(*cpuThread));
+		rc = vcos_thread_create( cpuThread,threadName.str().c_str(), NULL, cpuWorker, & ctx->ip->cpu_tracking_state[i] );
+		assert (rc == VCOS_SUCCESS);
+	}
 	
 	if( ctx->verbose ) { std::cout<<"Application initialized\n"; }
 	return 0;

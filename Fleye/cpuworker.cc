@@ -6,14 +6,14 @@
 
 void *cpuWorker(void *arg)
 {
-	FleyeContext * ctx = (FleyeContext *) arg;
-	CpuWorkerState* state = & ctx->ip->cpu_tracking_state;
+	CpuWorkerState* state = (CpuWorkerState*) arg;
+	FleyeContext * ctx = state->ctx;
 	
-	if( ctx->verbose ) { std::cout<<"CPU worker started\n"; }
+	if( ctx->verbose ) { std::cout<<"CPU worker #"<<state->tid<<" started\n"; }
 	state->cpuFunc = 0;
 	
 	//vcos_semaphore_wait( & state->start_processing_sem );
-	waitStartProcessingSem( ctx );
+	ctx->waitStartProcessingSem( state->tid );
 	
 	while( state->do_processing )
 	{
@@ -22,7 +22,7 @@ void *cpuWorker(void *arg)
 			state->cpu_processing[ state->cpuFunc ]->run( ctx );
 			
 			// signal that one more task has finished
-			postEndProcessingSem( ctx );
+			ctx->postEndProcessingSem( state->tid );
 			//vcos_semaphore_post( & state->end_processing_sem );
 			
 			// step to the next function to execute
@@ -34,7 +34,7 @@ void *cpuWorker(void *arg)
 		}
 
 		// wait signal to start next procesing 
-		waitStartProcessingSem( ctx );
+		ctx->waitStartProcessingSem( state->tid );
 		//vcos_semaphore_wait( & state->start_processing_sem );
 	}
 	

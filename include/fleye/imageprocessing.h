@@ -11,20 +11,29 @@
 
 struct GLTexture;
 struct FrameBufferObject;
-struct FleyeCommonState;
-struct UserEnv;
 struct FleyeRenderWindow;
+struct FleyeContext;
 
 struct ImageProcessingState
 {
-	CpuWorkerState cpu_tracking_state;
+	inline ImageProcessingState(FleyeContext* _ctx)
+		: ctx(_ctx)
+		{
+			for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+			{
+				cpu_tracking_state[i].ctx = _ctx;
+				cpu_tracking_state[i].tid = i;
+			}
+		}
+	
+	FleyeRenderWindow* getRenderBuffer(const std::string& name) const;
+	int readScriptFile();	
+
+	FleyeContext* ctx;
+	CpuWorkerState cpu_tracking_state[PROCESSING_ASYNC_THREADS];
 	std::vector<ProcessingStep> processing_step;
 	std::map<std::string,GLTexture*> texture;
 	std::map<std::string,FrameBufferObject*> fbo;
-	
-	FleyeRenderWindow* getRenderBuffer(const std::string& name) const;
 };
-
-int read_image_processing_script(FleyeContext* ctx);
 
 #endif

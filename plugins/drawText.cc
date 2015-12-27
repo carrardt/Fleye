@@ -2,7 +2,7 @@
 #include "fleye/compiledshader.h"
 #include "fleye/FleyeContext.h"
 
-#include "TextService.h"
+#include "services/TextService.h"
 
 #include <iostream>
 

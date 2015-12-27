@@ -100,21 +100,21 @@ struct gpioPanTiltFollower : public FleyePlugin
 #define ACQUIRE_COUNT 128
 	void run(FleyeContext* ctx)
 	{
-		CpuWorkerState* state = & ctx->ip->cpu_tracking_state;
+		//CpuWorkerState* state = & ctx->ip->cpu_tracking_state;
 
 		struct timeval T2;
 		gettimeofday(&T2,NULL);
 		double deltaT = (T2.tv_sec-prevTime.tv_sec)*1000.0 + (T2.tv_usec-prevTime.tv_usec)*0.001;
 		prevTime = T2;
 
-		if( state->objectCount < 1 ) return;
+		//if( state->objectCount < 1 ) return;
 
-		double xf = ( state->objectCenter[0][0] - 0.5 ) * 2.0;
-		double yf = ( state->objectCenter[0][1] - 0.5 ) * 2.0;
+		double xf = 0.0f; //( state->objectCenter[0][0] - 0.5 ) * 2.0;
+		double yf = 0.0f; //( state->objectCenter[0][1] - 0.5 ) * 2.0;
 		double dist2 = xf*xf + yf*yf;
 
-		laserPosX = ( state->objectCenter[1][0] - 0.5 ) * 2.0;
-		laserPosY = ( state->objectCenter[1][1] - 0.5 ) * 2.0;
+		laserPosX = 0.0f; //( state->objectCenter[1][0] - 0.5 ) * 2.0;
+		laserPosY = 0.0f; //( state->objectCenter[1][1] - 0.5 ) * 2.0;
 
 		if( autoCalibration )
 		{		

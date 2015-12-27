@@ -42,7 +42,7 @@ int glworker_init(struct FleyeContext* ctx)
 	assert( ctx->cameraTextureId != 0 );
    
    FleyeRenderWindow* renwin = ctx->render_window;
-   ImageProcessingState* ip = new ImageProcessingState;
+   ImageProcessingState* ip = new ImageProcessingState(ctx);
    ctx->ip = ip;
       
 	GLTexture* nullTexture = new GLTexture;
@@ -77,7 +77,7 @@ int glworker_init(struct FleyeContext* ctx)
 	displayFBO->render_window = ctx->render_window;
 	ip->fbo["DISPLAY"] = displayFBO;
 
-	int rc = read_image_processing_script( ctx );
+	int rc = ctx->ip->readScriptFile();
 	if( rc != 0 )
 	{
 		std::cerr<<"Failed to initialize image processing pipeline\n";
@@ -98,8 +98,10 @@ int glworker_init(struct FleyeContext* ctx)
 		printf( "GL_EXTENSIONS: %s\n", glGetString( GL_EXTENSIONS ) );
 	}
 
-	ip->cpu_tracking_state.objectCount = 0;
-	ip->cpu_tracking_state.do_processing = 1;
+	for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+	{
+		ip->cpu_tracking_state[i].do_processing = 1;
+	}
 
     return 0;
 }
@@ -200,24 +202,26 @@ static void apply_shader_pass(FleyeContext* ctx, ProcessingStep* ps, int passCou
 
 int glworker_redraw(FleyeContext* ctx)
 {
-	int step = 0;
-	int swapBuffers = 0;
-
 	//std::cout<<"glworker_redraw: mainwin "<<mainwin<<"\n";
 
 	// wait previous async cycle to be finished
-	int nPrevTasksToWait = ctx->ip->cpu_tracking_state.nAvailCpuFuncs - ctx->ip->cpu_tracking_state.nFinishedCpuFuncs;
-	//printf("waiting %d (%d/%d) previous tasks\n",nPrevTasksToWait,state->ip->cpu_tracking_state.nFinishedCpuFuncs,state->ip->cpu_tracking_state.nAvailCpuFuncs);
-	while( nPrevTasksToWait > 0 )
+	for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
 	{
-		waitEndProcessingSem( ctx );
-		-- nPrevTasksToWait;
+		CpuWorkerState* state = & ctx->ip->cpu_tracking_state[i];
+		int nPrevTasksToWait = state->nAvailCpuFuncs - state->nFinishedCpuFuncs;
+		//printf("waiting %d (%d/%d) previous tasks\n",nPrevTasksToWait,state->ip->cpu_tracking_state.nFinishedCpuFuncs,state->ip->cpu_tracking_state.nAvailCpuFuncs);
+		while( nPrevTasksToWait > 0 )
+		{
+			ctx->waitEndProcessingSem( i );
+			-- nPrevTasksToWait;
+		}
+		state->nAvailCpuFuncs = 0;
+		state->nFinishedCpuFuncs = 0;
 	}
-	ctx->ip->cpu_tracking_state.nAvailCpuFuncs = 0;
-	ctx->ip->cpu_tracking_state.nFinishedCpuFuncs = 0;
 
     GLCHK( glActiveTexture(GL_TEXTURE0) );
 
+	int swapBuffers = 0;
 	for( ProcessingStep& ps : ctx->ip->processing_step )
 	{
 		if( ps.onFrames.contains( ctx->frameCounter ) )
@@ -259,26 +263,32 @@ int glworker_redraw(FleyeContext* ctx)
 			}
 			if( ps.cpuPass != 0 )
 			{
-				if( ps.cpuPass->exec_thread == 0 )
+				int tid = ps.cpuPass->exec_thread;
+				if( tid <= 0 )
 				{
 					//printf("sync exec cpu step #%d\n",step);
 					ps.cpuPass->cpu_processing->run( ctx );
 				}
 				else
 				{
+					-- tid;
 					//printf("async start cpu step #%d\n",step);
-					ctx->ip->cpu_tracking_state.cpu_processing[ ctx->ip->cpu_tracking_state.nAvailCpuFuncs ] = ps.cpuPass->cpu_processing;
-					++ ctx->ip->cpu_tracking_state.nAvailCpuFuncs;
-					postStartProcessingSem( ctx );
-					//vcos_semaphore_post(& ip->cpu_tracking_state.start_processing_sem);
+					CpuWorkerState* state = & ctx->ip->cpu_tracking_state[tid];
+					state->cpu_processing[ state->nAvailCpuFuncs ] = ps.cpuPass->cpu_processing;
+					++ state->nAvailCpuFuncs;
+					ctx->postStartProcessingSem( tid );
 				}
 			}
 		}
 	}
 	
 	// terminate async processing cycle
-	ctx->ip->cpu_tracking_state.cpu_processing[ ctx->ip->cpu_tracking_state.nAvailCpuFuncs ] = 0;
-	postStartProcessingSem( ctx );
+	for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+	{
+		CpuWorkerState* state = & ctx->ip->cpu_tracking_state[i];
+		state->cpu_processing[ state->nAvailCpuFuncs ] = 0;
+		ctx->postStartProcessingSem( i );
+	}
 
     GLCHK(glUseProgram(0));
 

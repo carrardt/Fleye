@@ -1,6 +1,6 @@
 #include "fleye/plugin.h"
 #include "fleye/FleyeContext.h"
-#include "TextService.h"
+#include "services/TextService.h"
 
 #include <sys/time.h>
 #include <sstream>

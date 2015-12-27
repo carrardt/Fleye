@@ -118,7 +118,7 @@ FrameSet get_frame_set(FleyeContext* env, Json::Value frame)
 	return FrameSet(); //all frames
 }
 
-int read_image_processing_script(FleyeContext* ctx)
+int ImageProcessingState::readScriptFile()
 {
 	// TODO: transferer dans inc_fs et inc_vs
 	static const std::string uniforms = 	
@@ -131,13 +131,11 @@ int read_image_processing_script(FleyeContext* ctx)
 
 	static const std::string vs_attributes = 
 		"attribute vec4 vertex;\n"
+		//"attribute vec4 color;\n"
+		//"attribute vec2 tcoord;\n"
 		;
 
 	static const std::string inc_fs = readShader("inc_fs");
-
-	ctx->ip->cpu_tracking_state.cpuFunc = 0;
-	ctx->ip->cpu_tracking_state.nAvailCpuFuncs = 0;
-	ctx->ip->cpu_tracking_state.nFinishedCpuFuncs = 0;
 
 	std::string filePath = std::string(FLEYE_SCRIPT_DIR) + "/" + ctx->script + ".json";
 	if( ctx->verbose ) { std::cout<<"reading "<<filePath<<"\n\n"; }
