@@ -1,5 +1,6 @@
 void main(void)
 {
-   gl_Position = vertex;
-   // gl_PointSize = max( size.x , size.y );
+   gl_Position = in_Vertex;
+   var_TexCoord = in_TexCoord;
+   var_Color = in_Color;
 }

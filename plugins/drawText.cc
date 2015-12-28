@@ -19,7 +19,8 @@ struct drawText : public FleyePlugin
 	{
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-		glEnableVertexAttribArray(cs->shader.attribute_locations[0]);
+		cs->enableVertexArray(FLEYE_GL_VERTEX);
+		cs->enableVertexArray(FLEYE_GL_TEXCOORD);
 		
 		for( PositionnedText* pt : m_txtsvc->getPositionnedTexts() )
 		{
@@ -36,20 +37,22 @@ struct drawText : public FleyePlugin
 					float cx = (pt->x+(col/(float)m_columns))*2.0 - 1.0;
 					float cy = 1.0 - (pt->y+(line/(float)m_lines))*2.0 ;
 					//std::cout<<"cx="<<cx<<", cy="<<cy<<"\n";
-					drawCharPos(cs->shader.attribute_locations[0], cx, cy, c);
+					drawCharPos(cs, cx, cy, c);
 					++ col;
 					if( col>=80 ) { ++line; col=0; }
 				}
 			}
 		}
 		
-		glDisableVertexAttribArray(cs->shader.attribute_locations[0]);
+		cs->enableVertexArray(FLEYE_GL_VERTEX);
+		cs->disableVertexArray(FLEYE_GL_TEXCOORD);
 		glDisable(GL_BLEND);
 	}
 
-	void drawCharPos(GLint vLoc, float posX, float posY, int c)
+	void drawCharPos(CompiledShader* cs, float posX, float posY, int c)
 	{
-		GLfloat varray[16];
+		GLfloat varray[8];
+		GLfloat tarray[8];
 		for(int i=0;i<4;i++)
 		{
 			int x = i%2;
@@ -58,20 +61,21 @@ struct drawText : public FleyePlugin
 			float vy = posY + (y ? 2.0f/m_lines : 0.0f);
 			int cy = 15 - c/16;
 			int cx = c%16;
-			float tx = cx/16.0f + ( x ? 1.0f/16.0f : 0.0f );
-			float ty = cy/16.0f + ( y ? 1.0f/16.0f : 0.0f );
-			varray[i*4+0] = vx;
-			varray[i*4+1] = vy;
-			varray[i*4+2] = tx;
-			varray[i*4+3] = ty;
+			float tx = cx/16.0f + ( x ? (1.0f/16.0f)-(1.0f/256.0f) : (1.0f/256.0f) );
+			float ty = cy/16.0f + ( y ? (1.0f/16.0f)-(1.0f/256.0f) : (1.0f/256.0f) );
+			varray[i*2+0] = vx;
+			varray[i*2+1] = vy;
+			tarray[i*2+0] = tx;
+			tarray[i*2+1] = ty;
 		}
-		glVertexAttribPointer(vLoc, 4, GL_FLOAT, GL_FALSE, 0, varray);
+		cs->vertexAttribPointer(FLEYE_GL_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, varray);
+		cs->vertexAttribPointer(FLEYE_GL_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, tarray);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	}
 
-	void drawChar(GLint vLoc, int col, int line, int c)
+	void drawChar(CompiledShader* cs, int col, int line, int c)
 	{
-		drawCharPos(vLoc, (2.0f*col/(float)m_columns)-1.0f, 1.0f-(2.0f*line/(float)m_lines), c );
+		drawCharPos(cs, (2.0f*col/(float)m_columns)-1.0f, 1.0f-(2.0f*line/(float)m_lines), c );
 	}
 
 	TextService* m_txtsvc;

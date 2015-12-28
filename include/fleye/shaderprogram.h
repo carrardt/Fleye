@@ -6,6 +6,18 @@
 
 #include <string>
 #include <vector>
+
+#define FLEYE_GL_VERTEX 	0
+#define FLEYE_GL_COLOR 		1
+#define FLEYE_GL_TEXCOORD 	2
+
+#define FLEYE_GL_STEP 	0
+#define FLEYE_GL_SIZE 	1
+#define FLEYE_GL_ITER 	2
+#define FLEYE_GL_ITER2I 3
+#define FLEYE_GL_STEP2I 4
+
+
 /**
  * Container for a simple shader program. The uniform and attribute locations
  * are automatically setup by fleye_build_shader_program.

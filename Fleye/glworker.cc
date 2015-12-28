@@ -166,11 +166,11 @@ static void apply_shader_pass(FleyeContext* ctx, ProcessingStep* ps, int passCou
 	// set uniform values
 	double p2i = 1<<passCounter;
 	int loc;
-	if( (loc=compiledShader->shader.uniform_locations[0]) != -1 ) { GLCHK( glUniform2f(loc, 1.0 / destFBO->width, 1.0 / destFBO->height ) ); }
-	if( (loc=compiledShader->shader.uniform_locations[1]) != -1 ) { GLCHK( glUniform2f(loc, destFBO->width, destFBO->height ) ); }
-	if( (loc=compiledShader->shader.uniform_locations[2]) != -1 ) { GLCHK( glUniform1f(loc, passCounter ) ); }
-	if( (loc=compiledShader->shader.uniform_locations[3]) != -1 ) { GLCHK( glUniform1f(loc, p2i ) ); }
-	if( (loc=compiledShader->shader.uniform_locations[4]) != -1 ) { GLCHK( glUniform2f(loc, p2i/destFBO->width, p2i/destFBO->height ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_STEP]) != -1 ){ GLCHK( glUniform2f(loc, 1.0 / destFBO->width, 1.0 / destFBO->height ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_SIZE]) != -1 ) { GLCHK( glUniform2f(loc, destFBO->width, destFBO->height ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_ITER]) != -1 ) { GLCHK( glUniform1f(loc, passCounter ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_ITER2I]) != -1 ) { GLCHK( glUniform1f(loc, p2i ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_STEP2I]) != -1 ) { GLCHK( glUniform2f(loc, p2i/destFBO->width, p2i/destFBO->height ) ); }
 
 	// call custom drawing function
 	if( shaderPass->drawPlugin != 0 )

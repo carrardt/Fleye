@@ -64,17 +64,32 @@ struct Builtin : public FleyePlugin
 {
 	void draw(FleyeContext* ctx, CompiledShader* compiledShader, int pass)
 	{
-		static GLfloat tstrip[12] = {
+		static const GLfloat tstripV[12] = {
 			-1,-1,0,
 			-1,1,0, 
 			1,-1,0, 
 			1,1,0
 			};
 
-		GLCHK( glEnableVertexAttribArray(compiledShader->shader.attribute_locations[0]));
-		GLCHK( glVertexAttribPointer(compiledShader->shader.attribute_locations[0], 3, GL_FLOAT, GL_FALSE, 0, tstrip));
+		static const GLfloat tstripT[8] = {
+			0,0,
+			0,1, 
+			1,0, 
+			1,1
+			};
+
+		compiledShader->vertexAttrib4f(FLEYE_GL_COLOR, 1.0f,1.0f,1.0f,1.0f );
+		
+		compiledShader->enableVertexArray(FLEYE_GL_VERTEX);
+		compiledShader->enableVertexArray(FLEYE_GL_TEXCOORD);
+		
+		compiledShader->vertexAttribPointer(FLEYE_GL_VERTEX, 3, GL_FLOAT, GL_FALSE, 0, tstripV);
+		compiledShader->vertexAttribPointer(FLEYE_GL_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, tstripT);
+		
 		GLCHK( glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-		GLCHK( glDisableVertexAttribArray(compiledShader->shader.attribute_locations[0]));
+		
+		compiledShader->disableVertexArray(FLEYE_GL_TEXCOORD);
+		compiledShader->disableVertexArray(FLEYE_GL_VERTEX);
 	}
 };
 

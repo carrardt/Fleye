@@ -43,8 +43,8 @@ int fleyeutil_build_shader_program(ShaderProgram *p, const char* vertex_source, 
     glGetShaderiv(p->vs, GL_COMPILE_STATUS, &status);
     if (! status) {
         glGetShaderInfoLog(p->vs, sizeof(log), &logLen, log);
-        fprintf(stderr,"Program info log %s\n", log);
-        return -1;
+        std::cerr<<log<<"\n";
+        abort();
     }
 
     p->fs = glCreateShader(GL_FRAGMENT_SHADER);
@@ -54,8 +54,8 @@ int fleyeutil_build_shader_program(ShaderProgram *p, const char* vertex_source, 
     glGetShaderiv(p->fs, GL_COMPILE_STATUS, &status);
     if (! status) {
         glGetShaderInfoLog(p->fs, sizeof(log), &logLen, log);
-        fprintf(stderr,"Program info log %s\n", log);
-        return -1;
+        std::cerr<<log<<"\n";
+        abort();
     }
 
     p->program = glCreateProgram();
@@ -99,7 +99,7 @@ int fleyeutil_build_shader_program(ShaderProgram *p, const char* vertex_source, 
 		}
 		free(tmp);
 
-        return -1;
+        abort();
     }
 
 
@@ -108,12 +108,8 @@ int fleyeutil_build_shader_program(ShaderProgram *p, const char* vertex_source, 
 	for( auto attrName : p->attribute_names )
 	{
 		GLint loc = glGetAttribLocation(p->program, attrName.c_str() );
-        if ( loc == -1)
-        {
-            std::cerr<<"Failed to get location for attribute "<<attrName<<"\n";
-            return -1;
-        }
-        // std::cout<<"Attribute "<<attrName<<" mapped to location "<<loc<<"\n";
+        // if ( loc == -1) { std::cerr<<"unused attribute "<<attrName<<"\n"; }
+        // else { std::cout<<"Attribute "<<attrName<<" mapped to location "<<loc<<"\n"; }
         p->attribute_locations.push_back(loc);
 	}
 	
@@ -122,7 +118,7 @@ int fleyeutil_build_shader_program(ShaderProgram *p, const char* vertex_source, 
 	{
 		GLint loc = glGetUniformLocation(p->program, uniformName.c_str() );
         // if ( loc == -1) { std::cerr<<"unused uniform "<<uniformName<<"\n"; }
-        // else { std::cout<<"Uniform "<<uniformName<<"mapped to location "<<loc<<"\n"; }
+        // else { std::cout<<"Uniform "<<uniformName<<" mapped to location "<<loc<<"\n"; }
         p->uniform_locations.push_back(loc);
 	}
 	
@@ -135,15 +131,19 @@ int create_image_shader(ShaderProgram* shader, const char* vs, const char* fs)
 	// generate score values corresponding to color matching of target
 	memset(shader,0,sizeof(ShaderProgram));
 	
-	shader->attribute_names.resize(1);
-	shader->attribute_names[0] = "vertex";
-	
+	// standard attribute names
+	shader->attribute_names.resize(3);
+	shader->attribute_names[FLEYE_GL_VERTEX] = "in_Vertex";
+	shader->attribute_names[FLEYE_GL_COLOR] = "in_Color";
+	shader->attribute_names[FLEYE_GL_TEXCOORD] = "in_TexCoord";
+
+	// standard uniforma names
 	shader->uniform_names.resize(5);
-	shader->uniform_names[0] = "step";
-	shader->uniform_names[1] = "size";
-	shader->uniform_names[2] = "iter";
-	shader->uniform_names[3] = "iter2i";
-	shader->uniform_names[4] = "step2i";
+	shader->uniform_names[FLEYE_GL_STEP] = "step";
+	shader->uniform_names[FLEYE_GL_SIZE] = "size";
+	shader->uniform_names[FLEYE_GL_ITER] = "iter";
+	shader->uniform_names[FLEYE_GL_ITER2I] = "iter2i";
+	shader->uniform_names[FLEYE_GL_STEP2I] = "step2i";
 
     int rc = fleyeutil_build_shader_program(shader,vs,fs);    
 	return rc;

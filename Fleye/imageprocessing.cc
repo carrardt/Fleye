@@ -120,22 +120,8 @@ FrameSet get_frame_set(FleyeContext* env, Json::Value frame)
 
 int ImageProcessingState::readScriptFile()
 {
-	// TODO: transferer dans inc_fs et inc_vs
-	static const std::string uniforms = 	
-		"uniform vec2 step;\n"
-		"uniform vec2 size;\n"
-		"uniform float iter;\n"
-		"uniform float iter2i;\n"
-		"uniform vec2 step2i;\n"
-		;
-
-	static const std::string vs_attributes = 
-		"attribute vec4 vertex;\n"
-		//"attribute vec4 color;\n"
-		//"attribute vec2 tcoord;\n"
-		;
-
-	static const std::string inc_fs = readShader("inc_fs");
+	static const std::string inc_fs = readShader("inc_fs") + readShader("inc_common");
+	static const std::string inc_vs = readShader("inc_vs") + readShader("inc_common");
 
 	std::string filePath = std::string(FLEYE_SCRIPT_DIR) + "/" + ctx->script + ".json";
 	if( ctx->verbose ) { std::cout<<"reading "<<filePath<<"\n\n"; }
@@ -241,13 +227,11 @@ int ImageProcessingState::readScriptFile()
 		ShaderPass* shaderPass = shadersDB[ name ];
 
 		// read vertex shader
-		shaderPass->vertexSource = vs_attributes+"\n"+uniforms+"\n"+
-			readShader( get_string_value(ctx,shader.get("vertex-shader","common_vs")) );
+		shaderPass->vertexSource = inc_vs +	readShader( get_string_value(ctx,shader.get("vertex-shader","common_vs")) );
 		if( ctx->verbose ) { std::cout<<"\tVertex shader size = "<<shaderPass->vertexSource.size()<<"\n"; }
 		
 		// read fragment shader
-		shaderPass->fragmentSourceWithoutTextures = uniforms+"\n"+inc_fs+"\n" +
-			readShader( get_string_value(ctx,shader.get("fragment-shader","passthru_fs")) );
+		shaderPass->fragmentSourceWithoutTextures = inc_fs + readShader( get_string_value(ctx,shader.get("fragment-shader","color_fs")) );
 		if( ctx->verbose ) { std::cout<<"\tFramgent shader size = "<<shaderPass->fragmentSourceWithoutTextures.size()<<"\n"; }
 
 		// load rendering function from plugin or builtin gl_fill

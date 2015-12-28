@@ -8,14 +8,13 @@
 	"GLShaders" :
 	{
 		"passthru" : {
-			"fragment-shader" : "passthru_fs" , 
+			"fragment-shader" : "texture_fs" , 
 			"textures" : { "tex" : "CAMERA" } 
 		}
 		,
 		"text-overlay" : {
-			"vertex-shader" : "text_vs" , 
-			"fragment-shader" : "text_fs" , 
-			"textures" : { "font" : "bitmapfont" } ,
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "bitmapfont" } ,
 			"rendering" : "drawText"
 		}
 	}
