@@ -1,7 +1,6 @@
 // green / red objects tracking
 // Example usage :
 // ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 960x720 -script l2crosscenterfast
-// this gives 20 FPS
 
 {
 	"EnvDefaults" :
@@ -11,7 +10,8 @@
 	,
 	"RenderBuffers" :
 	{
-		"l2c-render-buffer" : {} 
+		"l2c-render-buffer-odd" : {} ,
+		"l2c-render-buffer-even" : {}
 	}
 	,
 	"FrameBufferObjects" :
@@ -35,32 +35,39 @@
 			"passes" : "$CCMD"
 		}
 		,
-		"gpu-l2cross-final" : {
+		"gpu-l2cross-final-odd" : {
 			"fragment-shader" : "L2CrossFinal_fs" , 
 			"textures" : { "tex" : "gpu-l2cross-iteration" } ,
-			"output" : "l2c-render-buffer"
+			"output" : "l2c-render-buffer-odd"
+		}
+		,
+		"gpu-l2cross-final-even" : {
+			"fragment-shader" : "L2CrossFinal_fs" , 
+			"textures" : { "tex" : "gpu-l2cross-iteration" } ,
+			"output" : "l2c-render-buffer-even"
 		}
     }
     ,
     "CPUFunctions" :
     {
-		"cpu-l2CrossCenter" : {
-			"plugin" : "l2CrossCenter" , 
-			"thread-id" : 1
+		"cpu-l2CrossCenterMT" : {
+			"plugin" : "l2CrossCenterMT" , 
+			"thread-id" : "all-async"
 		}
 		,
 		"cpu-print-fps" : 
 		{ 
 			"plugin" : "printFPS" ,
-			"thread-id" : 2
+			"thread-id" : "main"
 		}
     }
     ,
     "ProcessingLoop" : [
-		  "cpu-print-fps" 			// thread 2
-		, "gpu-l2cross-init"		// trhead 0, GL async
+		  "gpu-l2cross-init"		// trhead 0, GL async
 		, "gpu-l2cross-iteration" 	// thread 0, GL async
-		, "gpu-l2cross-final"
-		, "cpu-l2CrossCenter" 		// thread 1
+		, "cpu-l2CrossCenterMT" 	// all worker threads
+		, "cpu-print-fps" 			// thread 1
+		, { "step" : "gpu-l2cross-final-odd", "frames" : "odd" }
+		, { "step" : "gpu-l2cross-final-even", "frames" : "even" }
 		]
 }

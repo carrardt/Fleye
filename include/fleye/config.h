@@ -1,7 +1,8 @@
 #ifndef __fleye_config_h
 #define __fleye_config_h
 
-#define PROCESSING_GPU		    		-1
+#define PROCESSING_ANY_ASYNC_THREAD		-2
+#define PROCESSING_ALL_ASYNC_THREADS	-1
 #define PROCESSING_MAIN_THREAD		    0
 #define PROCESSING_ASYNC_THREADS		2
 

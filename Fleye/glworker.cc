@@ -261,18 +261,39 @@ int glworker_redraw(FleyeContext* ctx)
 					ps.shaderPass->finalTexture->format = GL_RGB;
 				}
 			}
-			if( ps.cpuPass != 0 )
+			if( ps.cpuPass!=0 && ps.cpuPass->cpu_processing!=0 )
 			{
 				int tid = ps.cpuPass->exec_thread;
-				if( tid <= 0 )
+				
+				// choose the worker with least tasks scheduled
+				if( tid == PROCESSING_ANY_ASYNC_THREAD ) tid = 1;
+				for(int i=1;i<PROCESSING_ASYNC_THREADS;i++)
+				{
+					CpuWorkerState* stateI = & ctx->ip->cpu_tracking_state[i];
+					CpuWorkerState* stateTid = & ctx->ip->cpu_tracking_state[tid-1];
+					if( (stateI->nAvailCpuFuncs-stateI->cpuFunc) < (stateTid->nAvailCpuFuncs-stateTid->cpuFunc) )
+						tid = i+1;
+				}
+				
+				if( tid == PROCESSING_MAIN_THREAD )
 				{
 					//printf("sync exec cpu step #%d\n",step);
 					ps.cpuPass->cpu_processing->run( ctx, 0 );
 				}
+				else if( tid == PROCESSING_ALL_ASYNC_THREADS  )
+				{
+					for(int i=0;i<PROCESSING_ASYNC_THREADS;i++)
+					{
+						CpuWorkerState* state = & ctx->ip->cpu_tracking_state[i];
+						state->cpu_processing[ state->nAvailCpuFuncs ] = ps.cpuPass->cpu_processing;
+						++ state->nAvailCpuFuncs;
+						ctx->postStartProcessingSem( i );
+					}
+				}
 				else
 				{
 					-- tid;
-					//printf("async start cpu step #%d\n",step);
+					assert( tid>=0 && tid<PROCESSING_ASYNC_THREADS );
 					CpuWorkerState* state = & ctx->ip->cpu_tracking_state[tid];
 					state->cpu_processing[ state->nAvailCpuFuncs ] = ps.cpuPass->cpu_processing;
 					++ state->nAvailCpuFuncs;

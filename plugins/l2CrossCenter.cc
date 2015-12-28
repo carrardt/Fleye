@@ -1,7 +1,3 @@
-extern "C" {
-#include "interface/vcos/vcos.h"
-}
-
 #include "fleye/cpuworker.h"
 #include "fleye/plugin.h"
 #include "fleye/FleyeRenderWindow.h"
@@ -16,33 +12,33 @@ extern "C" {
 
 struct l2CrossCenter : public FleyePlugin
 {
-	inline l2CrossCenter() : render_buffer(0), obj1(0), obj2(0) {}
+	inline l2CrossCenter() : render_buffer_odd(0), render_buffer_even(0), obj1(0), obj2(0) {}
 	
 	void setup(FleyeContext* ctx)
 	{
-		render_buffer = ctx->ip->getRenderBuffer("l2c-render-buffer");
+		render_buffer_even = render_buffer_odd = ctx->ip->getRenderBuffer("l2c-render-buffer");
+		if( render_buffer_odd == 0 )
+		{
+			render_buffer_odd = ctx->ip->getRenderBuffer("l2c-render-buffer-odd");
+			render_buffer_even = ctx->ip->getRenderBuffer("l2c-render-buffer-even");
+		}
+		
 		TrackingService* track_svc = TrackingService_instance();
 		obj1 = track_svc->addTrackedObject(0);
-		obj2 = track_svc->addTrackedObject(1);
-		
-		memset(&mutex,0,sizeof(mutex));
-		assert( vcos_mutex_create(&mutex,"l2CrossMutex") == VCOS_SUCCESS );
-		
-		std::cout<<"L2CrossCenter setup : render_buffer @"<<render_buffer<<", obj1@"<<obj1<<", obj2@"<<obj2<< "\n";
+		obj2 = track_svc->addTrackedObject(1);		
+		std::cout<<"L2CrossCenter setup : render_buffer_odd="<<render_buffer_odd<<", render_buffer_even="<<render_buffer_even 
+				 <<", obj1="<<obj1<<", obj2="<<obj2<< "\n";
 	}
 
-	void run(FleyeContext* ctx, int threadId)
-	{
+	void run(FleyeContext* ctx, int threadId /*, frameCount */)
+	{		
+		// in case alternate render buffers are used, switched between the two
+		FleyeRenderWindow* render_buffer = (ctx->frameCounter%2==0) ? render_buffer_even : render_buffer_odd;
+		if( render_buffer == 0 ) return;
+		
 		int width = render_buffer->width();
 		int height = render_buffer->height();
-		
-		threadId -= 1; // we don't use the main thread (0)
-		int nThreads = PROCESSING_ASYNC_THREADS;
-		
-		int hStart = ( height * threadId ) / nThreads ;
-		int hEnd = ( height * (threadId+1) ) / nThreads ;
-		
-		render_buffer->copyToBuffer(0,hStart,width,hEnd-hStart);
+		render_buffer->copyToBuffer(0,0,width,height);
 		const uint32_t* base_ptr = (const uint32_t*) render_buffer->getCopyBuffer();
 		//std::cout<<width<<"x"<<height<<"\n";
 		
@@ -50,8 +46,8 @@ struct l2CrossCenter : public FleyePlugin
 		uint32_t obj2_sumx=0,obj2_sumy=0;
 		uint32_t obj1_count=0, obj2_count=0;
 		int obj1_L2max=1, obj2_L2max=1;
-		
-		for(uint32_t y=hStart;y<hEnd;y++)
+
+		for(uint32_t y=0;y<height;y++)
 		{
 			const uint32_t* p = base_ptr + y*width;
 			for(uint32_t x=0;x<width;x++)
@@ -97,9 +93,6 @@ struct l2CrossCenter : public FleyePlugin
 				}
 			}
 		}
-		
-		
-		vcos_mutex_lock(&mutex);
 
 		if(obj1_count>0)
 		{
@@ -108,22 +101,10 @@ struct l2CrossCenter : public FleyePlugin
 			float wy = (float)obj1_sumy ;
 			float nx = wx / (float)width;
 			float ny = wy / (float)height;
-			if( obj1_L2max > obj1->priority )
-			{
-				obj1->priority = obj1_L2max;
-				obj1->posX = 0.0f;
-				obj1->posY = 0.0f;
-				obj1->area = 0.0f;
-				obj1->weight = 0.0f;
-			}
-			if( obj1_L2max == obj1->priority )
-			{
-				obj1->posX += nx ;
-				obj1->posY += ny ;
-				obj1->area += W;
-				obj1->weight += W;
-				//std::cout<<"add "<<nx<<','<<ny<<','<<W<<"\n";
-			}
+			obj1->posX = nx ;
+			obj1->posY = ny ;
+			obj1->area = W;
+			obj1->weight = W;
 			obj1->timestamp = ctx->frameCounter;
 		}
 
@@ -134,29 +115,16 @@ struct l2CrossCenter : public FleyePlugin
 			float wy = (float)obj2_sumy ;
 			float nx = wx / (float)width;
 			float ny = wy / (float)height;
-			if( obj2_L2max > obj2->priority )
-			{
-				obj2->priority = obj2_L2max;
-				obj2->posX = 0.0f;
-				obj2->posY = 0.0f;
-				obj2->area = 0.0f;
-				obj2->weight = 0.0f;
-			}
-			if( obj2_L2max == obj2->priority )
-			{
-				obj2->posX += nx ;
-				obj2->posY += ny ;
-				obj2->area += W;
-				obj2->weight += W;
-			}
+			obj2->posX = nx ;
+			obj2->posY = ny ;
+			obj2->area = W;
+			obj2->weight = W;
 			obj2->timestamp = ctx->frameCounter;
 		}
-		
-		vcos_mutex_unlock(&mutex);
 	}
 	
-	VCOS_MUTEX_T mutex;
-	FleyeRenderWindow* render_buffer;
+	FleyeRenderWindow* render_buffer_odd;
+	FleyeRenderWindow* render_buffer_even;
 	TrackedObject* obj1;
 	TrackedObject* obj2;
 };

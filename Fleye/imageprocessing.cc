@@ -292,7 +292,14 @@ int ImageProcessingState::readScriptFile()
 		const Json::Value cpuFuncObject = cpuFuncsObject[name];
 		std::string pluginName = get_string_value(ctx,cpuFuncObject["plugin"]);
 		CpuPass* cpu = new CpuPass;
-		cpu->exec_thread = get_integer_value(ctx,cpuFuncObject.get("thread-id",0));
+		cpu->exec_thread = PROCESSING_MAIN_THREAD;
+		std::string threadName = get_string_value(ctx,cpuFuncObject["thread-id"]);
+		if( threadName == "all-async") cpu->exec_thread = PROCESSING_ALL_ASYNC_THREADS;
+		else if( threadName == "any-async") cpu->exec_thread = PROCESSING_ANY_ASYNC_THREAD;
+		else if( threadName == "main" || threadName == "sync" ) cpu->exec_thread = PROCESSING_MAIN_THREAD;
+		else {
+			cpu->exec_thread = get_integer_value(ctx,cpuFuncObject.get("thread-id",PROCESSING_MAIN_THREAD));
+		}
 		cpu->cpu_processing = FleyePlugin::plugin(ctx,pluginName);
 		if( ctx->verbose ) { std::cout<<"\t"<<name<<" : thread="<<cpu->exec_thread<<", function @"<<cpu->cpu_processing<<"\n"; }
 		cpuFuncDB[name] = cpu;
