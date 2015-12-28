@@ -16,14 +16,21 @@ float greenMask(vec3 p)
 void main(void)
 {
 	vec2 texcoord = normalizedWindowCoord();
-	vec3 A = texture2D(tex, texcoord ).xyz;
-	vec3 B = texture2D(texPrev, texcoord ).xyz;
+	vec3 A =( texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y-step.y*0.5) ).xyz
+			+ texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y+step.y*0.5) ).xyz
+			+ texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y-step.y*0.5) ).xyz
+			+ texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y+step.y*0.5) ).xyz ) * 0.25;
+	vec3 B =( texture2D(texPrev, vec2(texcoord.x-step.x*0.5, texcoord.y-step.y*0.5) ).xyz
+			+ texture2D(texPrev, vec2(texcoord.x-step.x*0.5, texcoord.y+step.y*0.5) ).xyz
+			+ texture2D(texPrev, vec2(texcoord.x+step.x*0.5, texcoord.y-step.y*0.5) ).xyz
+			+ texture2D(texPrev, vec2(texcoord.x+step.x*0.5, texcoord.y+step.y*0.5) ).xyz ) * 0.25;
+
 	B = B - A;
 	float motion = dot(B,B);
-	float motionMask = clamp( sign(motion-0.05) , 0.0 , 1.0 );
+	float motionMask = clamp( sign(motion-0.1) , 0.0 , 1.0 );
 
-	float gm = greenMask(A) * UNIT;
-	float lm = motionMask * UNIT;
+	float gm = greenMask(A)*motionMask * UNIT;
+	float lm = 0.0; //motionMask * UNIT;
 
 	gl_FragColor = vec4(gm,gm,lm,lm);
 }
