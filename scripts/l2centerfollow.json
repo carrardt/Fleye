@@ -11,7 +11,7 @@
     {
 		"init" : {
 			"vertex-shader" : "common_vs" ,
-			"fragment-shader" : "maskInitL2Cross_fs" ,
+			"fragment-shader" : "L2CrossInit_fs" ,
 			"rendering" : { "function" : "gl_fill" } ,
 			"textures" : { "tex" : "CAMERA" } ,
 			"output" : "fbo1" ,

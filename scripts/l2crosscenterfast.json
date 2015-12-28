@@ -23,7 +23,7 @@
     "GLShaders" :
     {
 		"gpu-l2cross-init" : {
-			"fragment-shader" : "maskInitL2Cross_fs" ,
+			"fragment-shader" : "L2CrossInit_fs" ,
 			"textures" : { "tex" : "CAMERA" } ,
 			"output" : "fbo1"
 		}
