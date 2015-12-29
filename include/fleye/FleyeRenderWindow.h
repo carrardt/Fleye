@@ -9,13 +9,13 @@ struct FleyeNativeWindow;
 
 struct FleyeRenderWindow
 {    
-	FleyeRenderWindow(int x, int y, int width, int height, const EGLint * attribs, FleyeRenderWindow* sharedCtxWin=NULL, bool offscreen=false);
+	FleyeRenderWindow(int x, int y, int width, int height, FleyeRenderWindow* sharedCtxWin=NULL, bool offscreen=false);
 	~FleyeRenderWindow();
 	
 	void copyToBuffer(int x,int y, int w,int h);
-	inline const uint8_t* getCopyBuffer() const { return read_back_buffer; }
+	inline uint8_t* getCopyBuffer() { return read_back_buffer; }
 	
-	inline const uint8_t* readBack()
+	inline uint8_t* readBack()
 	{
 		this->copyToBuffer(0,0,width(), height());
 		return this->getCopyBuffer();
@@ -32,6 +32,7 @@ struct FleyeRenderWindow
   private:
 
 	void create_egl_context(const EGLint * attribs, FleyeRenderWindow* sharedCtxWin);
+	void create_egl_pbuffer_context(const EGLint * attribs, const EGLint * pbAttribs, FleyeRenderWindow* sharedCtxWin);
 
     uint8_t * 			read_back_buffer;
 

@@ -1316,6 +1316,7 @@ int bcm2835_init(void)
 	if (fread(buf, 1, sizeof(buf), fp) == sizeof(buf))
 	  bcm2835_peripherals_size = (buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3] << 0);
 	fclose(fp);
+		printf("bcm2835_init: RPi2: base=%p, size=%ul\n",bcm2835_peripherals_base,bcm2835_peripherals_size);
     }
     /* else we are prob on RPi 1 with BCM2835, and use the hardwired defaults */
 

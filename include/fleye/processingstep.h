@@ -17,7 +17,11 @@ struct FrameSet
 	int32_t value;
 	inline FrameSet() : modulus(1), value(0) {}
 	inline FrameSet(int32_t m, int32_t v) : modulus(m), value(v) {}
-	inline bool contains(int32_t frame) const { return (frame%modulus)==value; }
+	inline bool contains(int32_t frame) const
+	{ 
+		if(modulus!=0) frame = frame % modulus;
+		return frame==value;
+	}
 };
 
 struct ShaderPass;

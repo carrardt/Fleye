@@ -50,15 +50,13 @@
 		}
 		,
 		"gpu-display-position" : {
-			"vertex-shader" : "zhue_vs" ,
 			"fragment-shader" : "color_fs" ,
 			"rendering" : "drawTrackingPos"
 		}
 		,
-		"gpu-display-fps" : {
-			"vertex-shader" : "text_vs" , 
-			"fragment-shader" : "text_fs" , 
-			"textures" : { "font" : "bitmapfont" } ,
+		"gpu-display-fps" : { 
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "bitmapfont" } ,
 			"rendering" : "drawText"
 		}
     }

@@ -8,8 +8,7 @@
     "GLShaders" :
     {
 		"copy-offscreen" : {
-			"fragment-shader" : "passthru_fs" ,
-			"textures" : { "tex" : "CAMERA" } ,
+			"fragment-shader" : "rgbatest_fs" ,
 			"output" : "readtest"
 		}
     }

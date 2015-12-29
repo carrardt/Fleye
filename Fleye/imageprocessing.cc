@@ -31,17 +31,6 @@ FleyeRenderWindow* ImageProcessingState::getRenderBuffer(const std::string& name
 	}
 }
 
-static const EGLint egl_fbo_attribs[] =
-{
-   EGL_RED_SIZE,   8,
-   EGL_GREEN_SIZE, 8,
-   EGL_BLUE_SIZE,  8,
-   EGL_ALPHA_SIZE, 8,
-   EGL_DEPTH_SIZE, 16,
-   EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-   EGL_NONE
-};
-
 static int64_t get_integer_value( FleyeContext* ctx, Json::Value x )
 {
 	if( x.isNumeric() ) return x.asInt64();
@@ -109,13 +98,26 @@ static std::vector<std::string> get_string_array(FleyeContext* env, Json::Value 
 
 FrameSet get_frame_set(FleyeContext* env, Json::Value frame)
 {
-	if( frame.isString() )
+	if( frame.isObject() )
+	{
+		uint32_t v = get_integer_value(env,frame["value"]);
+		uint32_t m = get_integer_value(env,frame["modulus"]);
+		return FrameSet(m,v);
+	}
+	else if( frame.isString() )
 	{
 		std::string value = get_string_value(env,frame);
-		if( value == "odd" ) { return FrameSet(2,1); }
-		if( value == "even" ) { return FrameSet(2,0); }
+		if( value == "first" ) { return FrameSet(0,1); }
+		else if( value == "odd" ) { return FrameSet(2,1); }
+		else if( value == "even" ) { return FrameSet(2,0); }
+		else { std::cerr<<"uknown frames '"<<value<<"'\n"; }
 	}
-	return FrameSet(); //all frames
+	else 
+	{
+		uint32_t f = get_integer_value(env,frame);
+		return FrameSet(0,f);
+	}
+	return FrameSet(1,0); //all frames
 }
 
 int ImageProcessingState::readScriptFile()
@@ -185,7 +187,7 @@ int ImageProcessingState::readScriptFile()
 		int64_t h = get_integer_value(ctx,rbuf.get("height","$HEIGHT"));
 		if( ctx->verbose ) { std::cout<<"Add Render buffer '"<<name<<"' : "<<w<<"x"<<h<<"\n"; }
 		FrameBufferObject* fbo = new FrameBufferObject;
-		fbo->render_window = new FleyeRenderWindow(0,0,w,h,egl_fbo_attribs,ctx->render_window,true);
+		fbo->render_window = new FleyeRenderWindow(0,0,w,h,ctx->render_window,true);
 		assert( fbo->render_window != 0 );
 		fbo->width = w;
 		fbo->height = h;

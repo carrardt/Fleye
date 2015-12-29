@@ -19,20 +19,9 @@
 #include "glworker.h"
 
 int glworker_init(struct FleyeContext* ctx)
-{
-	static const EGLint egl_config_attribs[] =
-	{
-	   EGL_RED_SIZE,   8,
-	   EGL_GREEN_SIZE, 8,
-	   EGL_BLUE_SIZE,  8,
-	   EGL_ALPHA_SIZE, 8,
-	   EGL_DEPTH_SIZE, 16,
-	   EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-	   EGL_NONE
-	};
- 
+{ 
 	// create the main render window
-	ctx->render_window = new FleyeRenderWindow(ctx->x,ctx->y,ctx->width,ctx->height,egl_config_attribs);
+	ctx->render_window = new FleyeRenderWindow(ctx->x,ctx->y,ctx->width,ctx->height);
 	assert( ctx->render_window != 0 );
 	ctx->current_window = ctx->render_window;
 

@@ -35,7 +35,7 @@ struct rgbatest : public FleyePlugin
 #define PRINT_MINMAX_STAT(x) \
 	std::cout<<" "<<#x<<":"<<x##Min<<"@"<<x##MinX<<','<<x##MinY<<"/"<<x##Max<<"@"<<x##MaxX<<','<<x##MaxY;
 
-	void run(FleyeContext* ctx)
+	void run(FleyeContext* ctx, int threadId)
 	{
 		int width = render_buffer->width();
 		int height = render_buffer->height();
@@ -71,7 +71,7 @@ struct rgbatest : public FleyePlugin
 			PRINT_MINMAX_STAT(g);
 			PRINT_MINMAX_STAT(b);
 			PRINT_MINMAX_STAT(a);
-			std::cout<<"                \r";
+			std::cout<<"                \n";
 		}
 	}
 };
