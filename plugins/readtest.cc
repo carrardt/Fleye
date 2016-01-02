@@ -21,7 +21,12 @@ struct readtest : public FleyePlugin
 
 	void run(FleyeContext* ctx)
 	{
-		const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack();	
+		int w = render_buffer->width();
+		int h = render_buffer->height();
+		uint8_t* ptr = render_buffer->getCopyBuffer();
+		//const uint32_t* base_ptr = (const uint32_t*) render_buffer->readBack();
+		render_buffer->copyToBuffer(0,0,w,h);
+		//glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,ptr);
 	}
 };
 

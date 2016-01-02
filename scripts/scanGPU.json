@@ -1,0 +1,30 @@
+// window (pixel) screen coordinates testing
+{
+	"FrameBufferObjects" :
+	{
+		"fbo" : {} 
+	}
+	,
+	"GLShaders" :
+	{
+		"copy" : {
+			"fragment-shader" : "scanGPU_fs" ,
+			"output" : "fbo"
+		}
+		,
+		"display" : {
+			"fragment-shader" : "passthru_fs", 
+			"textures" : { "tex" : "fbo" }
+		}
+	}
+	,
+    "CPUFunctions" :
+    {
+		"scanGPU" : {
+			"plugin" : "scanGPU" , 
+			"thread-id" : 0
+		}
+    }
+	,
+	"ProcessingLoop" : [ "copy", "display", "scanGPU" ]
+}

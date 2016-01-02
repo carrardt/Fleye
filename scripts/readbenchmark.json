@@ -8,8 +8,8 @@
     "GLShaders" :
     {
 		"copy-offscreen" : {
-			"fragment-shader" : "rgbatest_fs" ,
-			"output" : "readtest"
+			"fragment-shader" : "rgbatest_fs"
+			//, "output" : "readtest"
 		}
     }
     ,
