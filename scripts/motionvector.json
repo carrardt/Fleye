@@ -1,0 +1,71 @@
+// motion vector build
+{
+	"Textures" :
+	{
+		"bitmapfont" : { }
+	}
+	,
+	"FrameBufferObjects" :
+	{
+		"fbo-prev" : {}
+		, "fbo-filter" : {}
+		, "fbo-mv" : {}
+	}
+    ,
+    "GLShaders" :
+    {
+		"gpu-smooth-filter" : {
+			"fragment-shader" : "smoothFilter_fs" ,
+			"textures" : { "tex" : "CAMERA"  } ,
+			"output" : "fbo-filter"
+		}
+		,
+		"gpu-motion-init" : {
+			"fragment-shader" : "motionVectorInit_fs" ,
+			"textures" : { "tex" : "fbo-filter", "texPrev" : "fbo-prev" } ,
+			"output" : "fbo-mv"
+		}
+		,
+		"gpu-copy-prev" : {
+			"fragment-shader" : "texture_fs" ,
+			"textures" : { "tex" : "fbo-filter" } ,
+			"output" : "fbo-prev" 
+		}
+		,
+		"gpu-display-motion" : {
+			"fragment-shader" : "drawMotionVector_fs" ,
+			"textures" : { "tex_mv" : "fbo-mv" , "tex_camera" : "fbo-filter" }
+		}
+		,
+		"gpu-display-fps" : { 
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "bitmapfont" } ,
+			"rendering" : "drawText"
+		}
+    }
+    ,
+    "CPUFunctions" :
+    {
+		"cpu-print-fps" : 
+		{ 
+			"plugin" : "printFPS" ,
+			"thread-id" : 0
+		}
+		,
+		"cpu-pan-tilt" : 
+		{ 
+			"plugin" : "moveGPIOController" ,
+			"thread-id" : 0
+		}
+    }
+    ,
+    "ProcessingLoop" : [
+		  "cpu-pan-tilt"
+		, "gpu-smooth-filter"
+		, "gpu-motion-init"
+		, "gpu-display-motion"
+		, "cpu-print-fps" 		
+		, "gpu-display-fps"	
+		, "gpu-copy-prev"
+		]
+}
