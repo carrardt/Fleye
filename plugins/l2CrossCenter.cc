@@ -7,22 +7,49 @@
 #include "fleye/FleyeContext.h"
 
 #include "services/TrackingService.h"
+#include "services/TextService.h"
 
 #include <iostream> 
 
 
-#define DECLARE_MINMAX_STAT(x) uint32_t x##Min=256, x##Max=0
+#define DECLARE_MINMAX_STAT(x) int32_t x##Min=256, x##Max=0
 
 #define UPDATE_MINMAX_STAT(v) \
 	if(v<v##Min) { \
 		v##Min=v; \
-	} else if(v>v##Max) { \
+	} if(v>v##Max) { \
 		v##Max=v; \
 	}
+	
 
-#define PRINT_MINMAX_STAT(x) \
-	std::cout<<' '<<#x<<"=["<<x##Min<<';'<<x##Max<<']';
+#define PRINT_MINMAX_STAT(S,x) \
+	S<<' '<<#x<<"=["<<x##Min<<';'<<x##Max<<']';
 
+#define UPDATE_OBJ(o,M,X,Y) \
+	if( M > o##_L2max ) \
+	{  \
+		o##_count = 0; \
+		o##_sumx = 0; \
+		o##_sumy = 0; \
+		o##_L2max = M; \
+	} \
+	if( M == o##_L2max ) \
+	{ \
+		o##_sumx += X; \
+		o##_sumy += Y; \
+		++ o##_count; \
+	}
+
+#define UPDATE_OBJ_CENTER(M,X,Y) \
+if( M>0 ) { \
+	if( M<128 ) { \
+		M = M >> 3; \
+		UPDATE_OBJ(obj1,M,X,Y); \
+	} else { \
+		M = (M-128) >> 3; \
+		UPDATE_OBJ(obj2,M,X,Y); \
+	} \
+}
 
 
 struct l2CrossCenter : public FleyePlugin
@@ -60,7 +87,12 @@ struct l2CrossCenter : public FleyePlugin
 		int height = 0;
 		const uint32_t* base_ptr = 0;
 
-		// if non render buffer found, it means we're using main frame buffer
+		/*DECLARE_MINMAX_STAT(m0);
+		DECLARE_MINMAX_STAT(m1);
+		DECLARE_MINMAX_STAT(m2);
+		DECLARE_MINMAX_STAT(m3);*/
+
+		// if no render buffer found, it means we're using main frame buffer with glReadPixels
 		if( render_buffer == 0 )
 		{
 			width = ctx->render_window->width();
@@ -69,123 +101,61 @@ struct l2CrossCenter : public FleyePlugin
 			{
 				m_buffer = new uint32_t[width*height];
 			}
-			glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,m_buffer);
+			glReadPixels(0,0,width,height/4,GL_RGBA,GL_UNSIGNED_BYTE,m_buffer);
 			base_ptr = m_buffer;
 			
-			DECLARE_MINMAX_STAT(m);
-
-			for(uint32_t y=0;y<height;y++)
+			for(uint32_t y=0;y<height/4;y++)
 			{
 				const uint32_t* p = m_buffer + y*width;
 				for(uint32_t x=0;x<width;x++)
 				{
 					uint32_t value = p[x];
-					uint32_t m = ( value ) & 0x000000FF;
-					//uint32_t u = ( value >> 8) & 0x000000FF;
-					//uint32_t o = ( value >> 16) & 0x000000FF;
-					//uint32_t a = ( value >> 24) & 0x000000FF;
-					//int m = (r>u) ? r : u;
-					
-					
-					if( m>0 )
-					{
-						if( m<128 )
-						{
-							m = m >> 3;
-							UPDATE_MINMAX_STAT(m);
-							if( m > obj1_L2max )
-							{ 
-								obj1_count = 0;
-								obj1_sumx = 0;
-								obj1_sumy = 0;
-								obj1_L2max = m;
-							}
-							if( m == obj1_L2max )
-							{
-								obj1_sumx += x;
-								obj1_sumy += y;
-								++ obj1_count;
-							}
-						}
-						else
-						{
-							m = (m-128) >> 3;
-							UPDATE_MINMAX_STAT(m);
-							if( m > obj2_L2max )
-							{ 
-								obj2_count = 0;
-								obj2_sumx = 0;
-								obj2_sumy = 0; 
-								obj2_L2max = m;
-							}
-							if( m == obj2_L2max )
-							{
-								obj2_sumx += x;
-								obj2_sumy += y;
-								++ obj2_count;
-							}
-						}
-					}
+					uint32_t m0 = ( value ) & 0x000000FF;
+					uint32_t m1 = ( value >> 8) & 0x000000FF;
+					uint32_t m2 = ( value >> 16) & 0x000000FF;
+					uint32_t m3 = ( value >> 24) & 0x000000FF;
+					UPDATE_OBJ_CENTER( m0, x, (y*4+0) );
+					UPDATE_OBJ_CENTER( m1, x, (y*4+1) );
+					UPDATE_OBJ_CENTER( m2, x, (y*4+2) );
+					UPDATE_OBJ_CENTER( m3, x, (y*4+3) );
 				}
 			}
-			
-			PRINT_MINMAX_STAT(m);
-			std::cout<<'\n';
 		}
 		else
 		{
 			width = render_buffer->width();
 			height = render_buffer->height();
-			render_buffer->copyToBuffer(0,0,width,height);
+			//render_buffer->copyToBuffer(0,height/2,width,height/2);
+			render_buffer->copyToBuffer(0,height-(height/3),width,height/3);
 			base_ptr = (const uint32_t*) render_buffer->getCopyBuffer();
-			for(uint32_t y=0;y<height;y++)
+			base_ptr += width*(height-(height/3));
+			for(uint32_t y=0;y<height/3;y++)
 			{
 				const uint32_t* p = base_ptr + y*width;
 				for(uint32_t x=0;x<width;x++)
 				{
 					uint32_t value = p[x];
-					if( value >= 0xFF010000 )
-					{
-						int r = ( value >> 3) & 0x0000001F;
-						int u = ( value >> 11) & 0x0000001F;
-						int m = (r>u) ? r : u;	
-						if( value < 0xFF800000 )
-						{
-							if( m > obj1_L2max )
-							{ 
-								obj1_count = 0;
-								obj1_sumx = 0;
-								obj1_sumy = 0;
-								obj1_L2max = m;
-							}
-							if( m == obj1_L2max )
-							{
-								obj1_sumx += x;
-								obj1_sumy += (height-y-1);
-								++ obj1_count;
-							}
-						}
-						else
-						{
-							if( m > obj2_L2max )
-							{ 
-								obj2_count = 0;
-								obj2_sumx = 0;
-								obj2_sumy = 0; 
-								obj2_L2max = m;
-							}
-							if( m == obj2_L2max )
-							{
-								obj2_sumx += x;
-								obj2_sumy += (height-y-1);
-								++ obj2_count;
-							}
-						}
-					}
+					uint32_t m0 = ( value ) & 0x000000FF;
+					uint32_t m1 = ( value >> 8 ) & 0x000000FF;
+					uint32_t m2 = ( value >> 16 ) & 0x000000FF;
+					/*UPDATE_MINMAX_STAT(m0);
+					UPDATE_MINMAX_STAT(m1);
+					UPDATE_MINMAX_STAT(m2);*/
+					//int Yi = height - (y*2) - 1;
+					UPDATE_OBJ_CENTER( m0, x, (height-(y*3)-1) );
+					UPDATE_OBJ_CENTER( m1, x, (height-(y*3+1)-1) );
+					UPDATE_OBJ_CENTER( m2, x, (height-(y*3+2)-1) );
 				}
 			}
 		}
-				
+		
+		/*PRINT_MINMAX_STAT(std::cout,m0);
+		PRINT_MINMAX_STAT(std::cout,m1);
+		PRINT_MINMAX_STAT(std::cout,m2);
+		std::cout <<"\n";*/
+		
+		//TextService_instance()->console()<<obj1_L2max<<"\n";
+		//if(obj1_count>0 || obj2_count>0) TextService_instance()->console() <<"\n";
 
 		if(obj1_count>0)
 		{
@@ -199,6 +169,7 @@ struct l2CrossCenter : public FleyePlugin
 			obj1->area = W;
 			obj1->weight = W;
 			obj1->timestamp = ctx->frameCounter;
+			//TextService_instance()->console() << "Obj1@"<<obj1->posX<<","<<obj1->posY<<" ";
 		}
 
 		if(obj2_count>0)
@@ -213,6 +184,7 @@ struct l2CrossCenter : public FleyePlugin
 			obj2->area = W;
 			obj2->weight = W;
 			obj2->timestamp = ctx->frameCounter;
+			//TextService_instance()->console() << "Obj2@"<<obj2->posX<<","<<obj2->posY;
 		}
 	}
 	

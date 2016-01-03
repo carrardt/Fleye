@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-struct drawQuarterHeight : public FleyePlugin
+struct drawHalfHeight : public FleyePlugin
 {	
 	void setup(FleyeContext* ctx)
 	{
@@ -13,17 +13,17 @@ struct drawQuarterHeight : public FleyePlugin
 	void draw(FleyeContext* ctx ,CompiledShader* cs,int pass)
 	{
 		static const GLfloat tstripV[12] = {
-			-1,-1,0,
-			-1,-0.5,0, 
-			1,-1,0, 
-			1,-0.5,0
+			-1, -1, 0,
+			-1,  0, 0, 
+			 1, -1, 0, 
+			 1,  0, 0
 			};
 
 		static const GLfloat tstripT[8] = {
-			0,0,
-			0,1, 
-			1,0, 
-			1,1
+			0, 0,
+			0, 1, 
+			1, 0, 
+			1, 1
 			};
 
 		cs->vertexAttrib4f(FLEYE_GL_COLOR, 1.0f,1.0f,1.0f,1.0f );
@@ -39,7 +39,6 @@ struct drawQuarterHeight : public FleyePlugin
 		cs->disableVertexArray(FLEYE_GL_TEXCOORD);
 		cs->disableVertexArray(FLEYE_GL_VERTEX);
 	}
-
 };
 
-FLEYE_REGISTER_PLUGIN(drawQuarterHeight);
+FLEYE_REGISTER_PLUGIN(drawHalfHeight);

@@ -1,27 +1,19 @@
-#define UNIT (1.0/32.0)
-
-/*
- *   w
- * x * y
- *   z
- */
+#define L2C_FILTER_TEX 1
+#define L2C_UNIT (1.0/32.0)
 
 float incrementL2( float c, float nbh )
 {
-	if( nbh>0.0 && nbh==c ) c+=UNIT;
+	if( nbh>0.0 && nbh==c ) c += L2C_UNIT;
 	return c;
 }
 
-void main(void)
+vec4 l2CrossIteration( vec4 C, vec2 tc, vec2 st )
 {
-	vec2 texcoord = normalizedWindowCoord();
-	vec4 C = texture2D( tex, texcoord );
+	float tx = tc.x;
+	float ty = tc.y;
 
-	float tx = texcoord.x;
-	float ty = texcoord.y;
-
-	float Tx_p = tx + step2i.x;
-	float Ty_p = ty + step2i.y;
+	float Tx_p = tx + st.x;
+	float Ty_p = ty + st.y;
 		
 	if( Tx_p<1.0 )
 	{
@@ -36,6 +28,14 @@ void main(void)
 		C.y = incrementL2( C.y, nbh2.y);
 		C.w = incrementL2( C.w, nbh2.w);
 	}
+	
+	return C;
+}
+
+float compactL2Dist( vec2 tc, vec2 st )
+{
+	vec4 C = texture2D( tex, tc );
+	C = l2CrossIteration(C, tc, st);
 
 	float Ar = C.x;
 	float Au = C.y;
@@ -44,9 +44,8 @@ void main(void)
 		
 	float Am = max(Ar,Au);
 	float Bm = max(Br,Bu);
-	float m = 0.0;
-
-	//float o=0.0, r=0.0, u=0.0;
+	float m=0.0;
+	
 	if( Am >= Bm )
 	{
 		m = Am;
@@ -55,7 +54,5 @@ void main(void)
 	{
 		m = 0.5 + Bm;
 	}
-	
-
-	gl_FragColor = vec4( m, 0.0, 0.0, 0.0 );
+	return m;
 }

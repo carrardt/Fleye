@@ -22,8 +22,9 @@ struct ShaderPass
 	GLTexture* finalTexture;	
 	FleyePlugin* drawPlugin;
 	int numberOfPasses;
+	int passStartIndex; // offset to pass index, to enable multipass algorithms using different shaders
 	
-	inline ShaderPass() : drawPlugin(0), numberOfPasses(0), finalTexture(0) {}
+	inline ShaderPass() : drawPlugin(0), numberOfPasses(0), passStartIndex(0), finalTexture(0) {}
 };
 
 #endif

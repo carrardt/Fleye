@@ -12,7 +12,7 @@ struct printFPS : public FleyePlugin
 	void setup(FleyeContext* ctx)
 	{
 		TextService* txtsvc = TextService_instance();
-		fpsText = txtsvc->addPositionnedText(0.7,0.9);
+		fpsText = txtsvc->addPositionnedText(0.8,0.1);
 		//std::cout<<"printFPS: fpsText @"<<fpsText<<"\n";
 		fpsText->setText("Please wait...");
 	}
@@ -29,7 +29,7 @@ struct printFPS : public FleyePlugin
 	   {
 		  time_start = time_now;
 	   }
-	   else if (time_now - time_start > 5000)
+	   else if (time_now - time_start > 2000)
 	   {
 		  uint32_t frame_count = ctx->frameCounter - lastCount;
 		  float fps = (float) frame_count / ((time_now - time_start) / 1000.0f);

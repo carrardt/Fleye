@@ -235,7 +235,7 @@ int glworker_redraw(FleyeContext* ctx)
 						//std::cout<<"make current on "<<renwin<<"\n";
 						eglMakeCurrent(ctx->current_window->display, ctx->current_window->surface, ctx->current_window->surface, ctx->current_window->context);
 					}
-					apply_shader_pass( ctx, &ps, i, &swapBuffers);
+					apply_shader_pass( ctx, &ps, ps.shaderPass->passStartIndex + i, &swapBuffers);
 				}
 				if( nPasses>0 && fboPoolSize>0 )
 				{

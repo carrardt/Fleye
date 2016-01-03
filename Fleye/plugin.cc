@@ -37,20 +37,21 @@ FleyePlugin* FleyePlugin::plugin(FleyeContext* ctx, std::string name)
 	
 	if( s_plugins.find(name) == s_plugins.end() )
 	{
-		if(ctx->verbose) { std::cout<<"Load plugin '"<<name<<"'\n"; }
+		//if(ctx->verbose) { std::cout<<"Load plugin '"<<name<<"'\n"; }
 		std::string libFile = FLEYE_PLUGIN_DIR;
 		libFile += "/lib" + name + ".so";
 		handle = dlopen(libFile.c_str(), RTLD_GLOBAL | RTLD_NOW);		
 		if(handle==NULL)
 		{
 			std::cerr<<"failed to load plugin "<<name<<"\n";
-			return 0;
+			abort();
 		}
 	}
 	FleyePlugin* p = s_plugins[name];
 	if( p == 0 )
 	{
 		std::cerr<<"Could not find plugin "<<name<<"\n";
+		abort();
 	}
 	else
 	{

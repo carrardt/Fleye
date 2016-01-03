@@ -1,6 +1,6 @@
-#define UNIT (1.0/32.0)
 
-float greenMask(vec3 p)
+// object 1 : greenish areas
+float obj1Mask(vec3 p)
 {
 	const float greenThreshold = 0.667;
 
@@ -13,24 +13,18 @@ float greenMask(vec3 p)
 	else return 0.0;
 }
 
-void main(void)
+// object 2 : moving areas
+float obj2Mask(vec3 A)
 {
-	vec2 texcoord = normalizedWindowCoord();
-	vec3 A =( texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y-step.y*0.5) ).xyz
-			+ texture2D(tex, vec2(texcoord.x-step.x*0.5, texcoord.y+step.y*0.5) ).xyz
-			+ texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y-step.y*0.5) ).xyz
-			+ texture2D(tex, vec2(texcoord.x+step.x*0.5, texcoord.y+step.y*0.5) ).xyz ) * 0.25;
+#ifdef L2C_FILTER_TEX
 	vec3 B =( texture2D(texPrev, vec2(texcoord.x-step.x*0.5, texcoord.y-step.y*0.5) ).xyz
 			+ texture2D(texPrev, vec2(texcoord.x-step.x*0.5, texcoord.y+step.y*0.5) ).xyz
 			+ texture2D(texPrev, vec2(texcoord.x+step.x*0.5, texcoord.y-step.y*0.5) ).xyz
 			+ texture2D(texPrev, vec2(texcoord.x+step.x*0.5, texcoord.y+step.y*0.5) ).xyz ) * 0.25;
-
+#else
+	vec3 B = texture2D(texPrev,texcoord).xyz;
+#endif
 	B = B - A;
 	float motion = dot(B,B);
-	float motionMask = clamp( sign(motion-0.1) , 0.0 , 1.0 );
-
-	float gm = greenMask(A)*motionMask * UNIT;
-	float lm = 0.0; //motionMask * UNIT;
-
-	gl_FragColor = vec4(gm,gm,lm,lm);
+	return clamp( sign(motion-0.1) , 0.0 , 1.0 );
 }

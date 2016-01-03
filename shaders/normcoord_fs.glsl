@@ -1,6 +1,6 @@
 void main(void)
 {
-	vec2 normCoord = normalizedWindowCoord();
+	vec2 normCoord = var_TexCoord; //normalizedWindowCoord();
 	float r=0.0,g=0.0,b=0.0;
 	if( normCoord.x < step.x ) r=1.0;
 	else if( normCoord.x > (1.0-step.x) ) g=1.0;

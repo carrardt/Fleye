@@ -1,10 +1,12 @@
 // green / red objects tracking
 // Example usage :
-// ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 768x512+32+32 -script l2crosscenter
+// ./Fleye/fleye -ex fixedfps -res 960x720 -geom 960x720+32+32 -script l2cglread 
+// => 10-11 fps
 {
 	"EnvDefaults" :
 	{
-		"CCMD" : 5
+		  "CCMD" : 5
+		, "MaskFunc" : "L2CrossRedGreenMask_fs"
 	}
 	,
 	"Textures" :
@@ -19,29 +21,30 @@
 	}
     ,
     "GLShaders" :
-    {
+    {		
 		"gpu-l2cross-init" : {
-			"fragment-shader" : "L2CrossInit_fs" ,
-			"textures" : { "tex" : "CAMERA" } ,
-			"output" : "fbo1"
+			"fragment-shader" : [ "L2CrossCommon_fs", "$MaskFunc", "L2CrossInit_fs" ] 
+			, "textures" : { "tex" : "CAMERA" } 
+			, "output" : "fbo1"
 		}
 		,
 		"gpu-l2cross-iteration" : {
-			"fragment-shader" : "L2CrossIteration_fs" ,
-			"textures" : { "tex" : ["fbo1","fbo2"] } ,
-			"output" : ["fbo2","fbo1"] ,
-			"passes" : "$CCMD"
+			"fragment-shader" : [ "L2CrossCommon_fs", "L2CrossIteration_fs" ]
+			, "textures" : { "tex" : ["fbo1","fbo2"] }
+			, "output" : ["fbo2","fbo1"]
+			, "passes" : "$CCMD"
 		}
 		,
 		"gpu-l2cross-final" : {
-			"fragment-shader" : "L2CrossFinalCompact_fs" 
+			"fragment-shader" : [ "L2CrossCommon_fs", "L2CrossFinal4_fs" ]
 			, "textures" : { "tex" : "gpu-l2cross-iteration" }
-			, "rendering" : "drawQuaterHeight"
+			, "passStart" : "$CCMD"
+			, "rendering" : "drawQuarterHeight"
 		}
 		,
 		"gpu-display-masking" : {
-			"fragment-shader" : "drawL2Cross_fs" ,
-			"textures" : { "tex_l2cross" : "gpu-l2cross-iteration" , "tex_camera" : "CAMERA" }
+			"fragment-shader" : "drawL2Cross_fs"
+			, "textures" : { "tex_l2cross" : "gpu-l2cross-iteration" , "tex_camera" : "CAMERA" }
 		}
 		,
 		"gpu-display-position" : {
@@ -49,7 +52,7 @@
 			"rendering" : "drawTrackingPos"
 		}
 		,
-		"gpu-display-fps" : { 
+		"gpu-display-text" : { 
 			"fragment-shader" : "texture_fs" , 
 			"textures" : { "tex" : "bitmapfont" } ,
 			"rendering" : "drawText"
@@ -60,13 +63,13 @@
     {
 		"cpu-l2CrossCenter" : {
 			"plugin" : "l2CrossCenter" , 
-			"thread-id" : "main" // will schedule multiple instance of this task on every cpu worker thread
+			"thread-id" : "main" 
 		}
 		,
 		"cpu-print-fps" : 
 		{ 
 			"plugin" : "printFPS" ,
-			"thread-id" : "main" // scheduled on one thread only, any available one
+			"thread-id" : "any-async"
 		}
     }
     ,
@@ -77,8 +80,7 @@
 		, "gpu-l2cross-final" 		
 		, "cpu-l2CrossCenter"
 		, "gpu-display-masking"
-		, "gpu-display-fps"
+		, "gpu-display-text"
 		, "gpu-display-position"
-
 		]
 }

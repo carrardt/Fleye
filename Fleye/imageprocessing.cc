@@ -229,16 +229,25 @@ int ImageProcessingState::readScriptFile()
 		ShaderPass* shaderPass = shadersDB[ name ];
 
 		// read vertex shader
-		shaderPass->vertexSource = inc_vs +	readShader( get_string_value(ctx,shader.get("vertex-shader","common_vs")) );
+		shaderPass->vertexSource = inc_vs;
+		for( std::string vsItem : get_string_array(ctx,shader.get("vertex-shader","common_vs")) )
+		{
+			shaderPass->vertexSource += readShader( vsItem );
+		}
 		if( ctx->verbose ) { std::cout<<"\tVertex shader size = "<<shaderPass->vertexSource.size()<<"\n"; }
 		
 		// read fragment shader
-		shaderPass->fragmentSourceWithoutTextures = inc_fs + readShader( get_string_value(ctx,shader.get("fragment-shader","color_fs")) );
+		shaderPass->fragmentSourceWithoutTextures = inc_fs;
+		for( std::string fsItem : get_string_array(ctx,shader.get("fragment-shader","color_fs")) )
+		{
+			shaderPass->fragmentSourceWithoutTextures += readShader( fsItem );
+		}
 		if( ctx->verbose ) { std::cout<<"\tFramgent shader size = "<<shaderPass->fragmentSourceWithoutTextures.size()<<"\n"; }
 
 		// load rendering function from plugin or builtin gl_fill
 		std::string pluginName = get_string_value(ctx,shader["rendering"]);
 		shaderPass->drawPlugin = FleyePlugin::plugin(ctx,pluginName);
+		if( ctx->verbose ) { std::cout<<"\tplugin '"<<pluginName<<"' @"<<shaderPass->drawPlugin<<"\n"; }
 
 		const Json::Value textures = shader["textures"];
 		for( auto name : textures.getMemberNames() )
@@ -267,6 +276,8 @@ int ImageProcessingState::readScriptFile()
 
 		shaderPass->numberOfPasses = get_integer_value(ctx,shader.get("passes",1));
 		if( ctx->verbose ) { std::cout<<"\tPasses : "<<shaderPass->numberOfPasses<<"\n"; }
+		shaderPass->passStartIndex = get_integer_value(ctx,shader.get("passStart",0));
+		if( ctx->verbose ) { std::cout<<"\tPass start : "<<shaderPass->passStartIndex<<"\n"; }
 	}
 
 	if( ctx->verbose ) { std::cout<<"CPU functions :\n"; }
