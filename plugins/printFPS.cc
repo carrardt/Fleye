@@ -14,7 +14,7 @@ struct printFPS : public FleyePlugin
 		TextService* txtsvc = TextService_instance();
 		fpsText = txtsvc->addPositionnedText(0.8,0.1);
 		//std::cout<<"printFPS: fpsText @"<<fpsText<<"\n";
-		fpsText->setText("Please wait...");
+		fpsText->setText("? FPS");
 	}
 
 	void run(FleyeContext* ctx,int threadId)
@@ -39,7 +39,7 @@ struct printFPS : public FleyePlugin
 		  int F = fps*100.0f;
 		  oss<<F*0.01f<<" FPS";
 		  fpsText->setText( oss.str().c_str() );
-		  std::cout<<oss.str()<<"\n";
+		  //std::cout<<oss.str()<<"\n";
 	   }		
 	}
 

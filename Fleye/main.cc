@@ -105,7 +105,7 @@ static int user_initialize(void* user_data)
 static MMAL_BUFFER_HEADER_T * user_copy_buffer(MMAL_BUFFER_HEADER_T *buf, void* user_data)
 {
 	struct FleyeContext* ctx = (struct FleyeContext*) user_data;
-
+		
    GLCHK(glBindTexture(GL_TEXTURE_EXTERNAL_OES, ctx->cameraTextureId));
    if (ctx->priv->egl_image != EGL_NO_IMAGE_KHR)
    {
