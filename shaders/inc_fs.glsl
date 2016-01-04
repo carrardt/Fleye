@@ -6,6 +6,7 @@ uniform vec2 size;
 uniform float iter;
 uniform float iter2i;
 uniform vec2 step2i;
+uniform int frameCounter;
 
 // based on gl_FragCoord
 vec2 normalizedWindowCoord()

@@ -132,18 +132,19 @@ int create_image_shader(ShaderProgram* shader, const char* vs, const char* fs)
 	memset(shader,0,sizeof(ShaderProgram));
 	
 	// standard attribute names
-	shader->attribute_names.resize(3);
+	shader->attribute_names.resize(FLEYE_GL_ATTRIBUTES);
 	shader->attribute_names[FLEYE_GL_VERTEX] = "in_Vertex";
 	shader->attribute_names[FLEYE_GL_COLOR] = "in_Color";
 	shader->attribute_names[FLEYE_GL_TEXCOORD] = "in_TexCoord";
 
 	// standard uniforma names
-	shader->uniform_names.resize(5);
+	shader->uniform_names.resize(FLEYE_GL_UNIFORMS);
 	shader->uniform_names[FLEYE_GL_STEP] = "step";
 	shader->uniform_names[FLEYE_GL_SIZE] = "size";
 	shader->uniform_names[FLEYE_GL_ITER] = "iter";
 	shader->uniform_names[FLEYE_GL_ITER2I] = "iter2i";
 	shader->uniform_names[FLEYE_GL_STEP2I] = "step2i";
+	shader->uniform_names[FLEYE_GL_FRAME] = "frameCounter";
 
     int rc = fleyeutil_build_shader_program(shader,vs,fs);    
 	return rc;

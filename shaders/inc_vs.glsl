@@ -10,3 +10,4 @@ uniform vec2 size;
 uniform float iter;
 uniform float iter2i;
 uniform vec2 step2i;
+uniform int frameCounter;

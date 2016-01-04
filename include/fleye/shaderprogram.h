@@ -10,13 +10,15 @@
 #define FLEYE_GL_VERTEX 	0
 #define FLEYE_GL_COLOR 		1
 #define FLEYE_GL_TEXCOORD 	2
+#define FLEYE_GL_ATTRIBUTES 3
 
 #define FLEYE_GL_STEP 	0
 #define FLEYE_GL_SIZE 	1
 #define FLEYE_GL_ITER 	2
 #define FLEYE_GL_ITER2I 3
 #define FLEYE_GL_STEP2I 4
-
+#define FLEYE_GL_FRAME  5
+#define FLEYE_GL_UNIFORMS 6
 
 /**
  * Container for a simple shader program. The uniform and attribute locations

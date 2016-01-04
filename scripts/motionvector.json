@@ -7,22 +7,32 @@
 	,
 	"FrameBufferObjects" :
 	{
-		"fbo-prev" : {}
-		, "fbo-filter" : {}
-		, "fbo-mv" : {}
+		  "fbo-filter" : { "width" : 512, "height" : 512 }
+		, "fbo-prev"   : { "width" : 512, "height" : 512 }
+		, "fbo-mv"     : { "width" : 512, "height" : 512 }
 	}
     ,
     "GLShaders" :
     {
-		"gpu-smooth-filter" : {
-			"fragment-shader" : "smoothFilter_fs" ,
+		// noise removal needs two different passes
+		// 1st one computes horizontal part of the gaussian convolution and an edge detection metric
+		"gpu-remove-noise-1" : {
+			"fragment-shader" : "noiseRemoval1_fs" ,
 			"textures" : { "tex" : "CAMERA"  } ,
+			"output" : "fbo-mv"
+		}
+		,
+		// 2nd one computes the vertical part of the convolution and blend the result with orginal image
+		// using the edge detection metric
+		"gpu-remove-noise-2" : {
+			"fragment-shader" : "noiseRemoval2_fs" ,
+			"textures" : { "tex" : "CAMERA" , "tex_nr1" : "fbo-mv" } ,
 			"output" : "fbo-filter"
 		}
 		,
-		"gpu-motion-init" : {
-			"fragment-shader" : "motionVectorInit_fs" ,
-			"textures" : { "tex" : "fbo-filter", "texPrev" : "fbo-prev" } ,
+		"gpu-edge-detect" : {
+			"fragment-shader" : "edgeDetect_fs" ,
+			"textures" : { "tex" : "fbo-filter" } ,
 			"output" : "fbo-mv"
 		}
 		,
@@ -32,9 +42,9 @@
 			"output" : "fbo-prev" 
 		}
 		,
-		"gpu-display-motion" : {
-			"fragment-shader" : "drawMotionVector_fs" ,
-			"textures" : { "tex_mv" : "fbo-mv" , "tex_camera" : "fbo-filter" }
+		"gpu-display-filter" : { 
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "fbo-mv" }
 		}
 		,
 		"gpu-display-fps" : { 
@@ -60,12 +70,13 @@
     }
     ,
     "ProcessingLoop" : [
-		  "cpu-pan-tilt"
-		, "gpu-smooth-filter"
-		, "gpu-motion-init"
-		, "gpu-display-motion"
-		, "cpu-print-fps" 		
-		, "gpu-display-fps"	
+		  "cpu-print-fps"
+		//, "cpu-pan-tilt"
+		, "gpu-remove-noise-1"
+		, "gpu-remove-noise-2"
+		, "gpu-edge-detect"
+		, "gpu-display-filter"
+		, "gpu-display-fps"
 		, "gpu-copy-prev"
 		]
 }

@@ -160,6 +160,7 @@ static void apply_shader_pass(FleyeContext* ctx, ProcessingStep* ps, int passCou
 	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_ITER]) != -1 ) { GLCHK( glUniform1f(loc, passCounter ) ); }
 	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_ITER2I]) != -1 ) { GLCHK( glUniform1f(loc, p2i ) ); }
 	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_STEP2I]) != -1 ) { GLCHK( glUniform2f(loc, p2i/destFBO->width, p2i/destFBO->height ) ); }
+	if( (loc=compiledShader->shader.uniform_locations[FLEYE_GL_FRAME]) != -1 ) { GLCHK( glUniform1i(loc, ctx->frameCounter ) ); }
 
 	// call custom drawing function
 	if( shaderPass->drawPlugin != 0 )
