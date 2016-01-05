@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-#include "../thirdparty/gpioController.h"
+#include "gpioController.h"
 
 int main(int argc, char* argv[])
 {
@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 	Yf = Y * 0.017453292519943295 ;
 	
 	init_gpio();
+	for(int i=0;i<20;i++) gpio_set_mode(i,OUTPUT_MODE);
 	
 	switch( argv[1][0] )
 	{	
@@ -47,33 +48,6 @@ int main(int argc, char* argv[])
 				gpio_write_bits(0);
 				printf("Time = %g ms\n",T2-T1);
 			}
-			break;
-
-		case 'r':
-			gpio_write_xy_i(X,Y,L);
-			break;
-
-		case 'S':
-			for(i=1;i<1024;++i)
-			{
-				gpio_write_xy_i(X,i,L);
-				usleep(X);
-			}
-			gpio_write_xy_i(X,0,L);
-			break;
-
-		case 's':
-			for(i=1;i<1024;++i)
-			{
-				gpio_write_xy_i(i,Y,L);
-				usleep(Y);
-			}
-			gpio_write_xy_i(0,Y,L);
-			break;
-			
-		case 'a':
-			printf("angle: theta = %g, phi=%g, laser=%d\n",Xf,Yf,L);
-			gpio_write_theta_phi(Xf,Yf,L);
 			break;
 	}
 

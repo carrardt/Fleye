@@ -26,13 +26,14 @@ SET(PLUGINS_DIR ${CMAKE_CURRENT_BINARY_DIR}/plugins)
 SET(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
 
 add_subdirectory(thirdparty)
-add_subdirectory(gpiotest)
 add_subdirectory(plugins)
 add_subdirectory(scripts)
 add_subdirectory(shaders)
 
 add_subdirectory(RaspiCam)
 add_subdirectory(TestCamera)
+
+add_subdirectory(gpio)
 
 find_package(Jsoncpp REQUIRED)
 add_subdirectory(Fleye)

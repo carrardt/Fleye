@@ -22,6 +22,8 @@ extern "C" {
 #include "fleye/imageprocessing.h"
 #include "fleye/fbo.h"
 
+#include "gpio/gpioController.h"
+
 struct FleyeContextInternal
 {
    EGLImageKHR egl_image;            /// The current preview EGL image
@@ -184,6 +186,9 @@ int main(int argc, char * argv[])
 {
 	// must be called first, otherwise mml or vcos calls will fail
 	camera_streamer_init();
+
+	// initialize gpio module
+	init_gpio();
 
 	FleyeContext * ctx = new FleyeContext;
 

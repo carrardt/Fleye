@@ -47,7 +47,7 @@
 			"textures" : { "tex" : "fbo-mv" }
 		}
 		,
-		"gpu-display-fps" : { 
+		"gpu-display-text" : { 
 			"fragment-shader" : "texture_fs" , 
 			"textures" : { "tex" : "bitmapfont" } ,
 			"rendering" : "drawText"
@@ -64,7 +64,7 @@
 		,
 		"cpu-pan-tilt" : 
 		{ 
-			"plugin" : "moveGPIOController" ,
+			"plugin" : "panTiltController" ,
 			"thread-id" : 0
 		}
     }
@@ -76,7 +76,7 @@
 		, "gpu-remove-noise-2"
 		, "gpu-edge-detect"
 		, "gpu-display-filter"
-		, "gpu-display-fps"
+		, "gpu-display-text"
 		, "gpu-copy-prev"
 		]
 }
