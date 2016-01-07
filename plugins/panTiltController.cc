@@ -4,15 +4,15 @@
 #include "gpio/gpioController.h"
 #include <cmath>
 
-#define SERVO_X_VALUE_MIN 250
-#define SERVO_X_ANGLE_MIN -45.0
-#define SERVO_X_VALUE_MAX 750
-#define SERVO_X_ANGLE_MAX 45.0
+#define SERVO_X_VALUE_MIN 128
+#define SERVO_X_ANGLE_MIN -67.5
+#define SERVO_X_VALUE_MAX 896
+#define SERVO_X_ANGLE_MAX 67.5
 
-#define SERVO_Y_VALUE_MIN 250
-#define SERVO_Y_ANGLE_MIN -45.0
-#define SERVO_Y_VALUE_MAX 750
-#define SERVO_Y_ANGLE_MAX 45.0
+#define SERVO_Y_VALUE_MIN 128
+#define SERVO_Y_ANGLE_MIN -67.5
+#define SERVO_Y_VALUE_MAX 768
+#define SERVO_Y_ANGLE_MAX 45
 
 #define GPIO_AXIS_BITS 	10
 #define GPIO_LASER_BIT 	(2*GPIO_AXIS_BITS)
@@ -30,21 +30,23 @@ struct panTiltController : public FleyePlugin
 
 	void run(FleyeContext* ctx,int threadId)
 	{
-		 float theta = std::sin( ctx->frameCounter*0.02 );
-		 float phi = std::cos( ctx->frameCounter*0.03 );
-		 gpio_write_theta_phi(theta,phi);
+		
+		 float theta = atan( (std::cos( ctx->frameCounter*0.02 )) /4.0 ) ;
+		 float phi = atan( (std::sin( ctx->frameCounter*0.02 )) /4.0 ) ;
+		 gpio_write_theta_phi(theta,phi, ctx->frameCounter%2 );
 	}
 	
-	void gpio_write_xy_i(unsigned int xi, unsigned int yi)
+	void gpio_write_xy_i(unsigned int xi, unsigned int yi, bool laser)
 	{
 		uint32_t bits;
 		if( xi>=1024 ) xi=1023;
 		if( yi>=1024 ) yi=1023;
-		bits = (yi<<GPIO_AXIS_BITS) | xi;
+		bits = (yi<<GPIO_AXIS_BITS) | xi ;
+		bits |= laser ? 1UL<<GPIO_LASER_BIT : 0;
 		gpio_write_bits(bits);
 	}
 
-	void gpio_write_xy_f(float xf, float yf)
+	void gpio_write_xy_f(float xf, float yf, bool laser)
 	{
 		unsigned int xi,yi;
 
@@ -57,15 +59,15 @@ struct panTiltController : public FleyePlugin
 		xi = SERVO_X_VALUE_MIN + (unsigned int)( xf * (SERVO_X_VALUE_MAX-SERVO_X_VALUE_MIN) );
 		yi = SERVO_Y_VALUE_MIN + (unsigned int)( yf * (SERVO_Y_VALUE_MAX-SERVO_Y_VALUE_MIN) );
 
-		gpio_write_xy_i(xi,yi);
+		gpio_write_xy_i(xi,yi,laser);
 	}
 
 	// theta and phi are angle in radians
-	void gpio_write_theta_phi(float theta, float phi)
+	void gpio_write_theta_phi(float theta, float phi, bool laser)
 	{
 		gpio_write_xy_f(
 			(theta*57.29577951308232-SERVO_X_ANGLE_MIN)/(SERVO_X_ANGLE_MAX-SERVO_X_ANGLE_MIN) ,
-			(  phi*57.29577951308232-SERVO_Y_ANGLE_MIN)/(SERVO_Y_ANGLE_MAX-SERVO_Y_ANGLE_MIN) );
+			(  phi*57.29577951308232-SERVO_Y_ANGLE_MIN)/(SERVO_Y_ANGLE_MAX-SERVO_Y_ANGLE_MIN) , laser);
 	}
 
 };

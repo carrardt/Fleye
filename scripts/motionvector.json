@@ -71,7 +71,7 @@
     ,
     "ProcessingLoop" : [
 		  "cpu-print-fps"
-		//, "cpu-pan-tilt"
+		, "cpu-pan-tilt"
 		, "gpu-remove-noise-1"
 		, "gpu-remove-noise-2"
 		, "gpu-edge-detect"

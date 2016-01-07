@@ -26,7 +26,7 @@ void main()
 	vec3 d2 = abs( Su-Sb );
 	vec3 d3 = abs( Sur-Sbl );
 	vec3 d4 = abs( Sul-Sbr );
-	gl_FragColor.xyz = max( max(d1,d2) , max(d3,d4) );
+	gl_FragColor.xyz = max( max(d1,d2) , max(d3,d4) )*2.0;
 
 	gl_FragColor.w = 1.0;
 }

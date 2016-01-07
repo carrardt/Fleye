@@ -48,7 +48,7 @@ void gpio_write_bits(unsigned long gpio_bits)
 	
 	bcm2835_gpio_set_multi( 1UL<<GPIO_LOCK_BIT ); // set lock bit
 
-	printf("gpio_bits 0x%08X\n",gpio_bits);
+	//printf("gpio_bits 0x%08X\n",gpio_bits);
 	for(i=0;i<GPIO_LOCK_BIT;++i)
 	{
 		uint32_t bitMask = (1UL << i);
