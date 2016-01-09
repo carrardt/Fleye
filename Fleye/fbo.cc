@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-FrameBufferObject* add_fbo(ImageProcessingState* ip, const std::string& name, GLint colorFormat, GLint w, GLint h)
+FrameBufferObject* add_fbo(ImageProcessingState* ip, const std::string& name, GLint colorFormat, GLint w, GLint h, GLenum filtering)
 {
 	// create frame buffer object storage
 	FrameBufferObject* fbo = new FrameBufferObject;
@@ -31,28 +31,9 @@ FrameBufferObject* add_fbo(ImageProcessingState* ip, const std::string& name, GL
 	glTexImage2D(fbo->texture->target, 0, fbo->texture->format, fbo->width, fbo->height, 0, fbo->texture->format/*GL_RGBA*/, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(fbo->texture->target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(fbo->texture->target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(fbo->texture->target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(fbo->texture->target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(fbo->texture->target, GL_TEXTURE_MIN_FILTER, filtering);
+	glTexParameteri(fbo->texture->target, GL_TEXTURE_MAG_FILTER, filtering);
 	glBindTexture(fbo->texture->target, 0);
-
-	/*if( depthFormat != GL_NONE )
-	{
-	   // Create a texture to hold the depth buffer
-		glGenTextures(1, &(fbo->depht_rb) );
-		glBindTexture(GL_TEXTURE_2D, fbo->depht_rb);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-				fbo->width, fbo->height,
-				0, depthFormat, GL_UNSIGNED_SHORT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glBindTexture(GL_TEXTURE_2D, 0);        
-	}
-	else
-	{
-		fbo->depht_rb = 0;
-	}*/
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo->fb);
 

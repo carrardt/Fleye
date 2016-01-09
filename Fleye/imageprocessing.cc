@@ -202,8 +202,10 @@ int ImageProcessingState::readScriptFile()
 		const Json::Value fboValue = fbos[name];
 		int64_t w = get_integer_value(ctx,fboValue.get("width","$WIDTH"));
 		int64_t h = get_integer_value(ctx,fboValue.get("height","$HEIGHT"));
-		if( ctx->verbose ) { std::cout<<"Add Frame Buffer Object '"<<name<<"' : "<<w<<"x"<<h<<"\n"; }
-		FrameBufferObject* fbo = add_fbo(ctx->ip,name,GL_RGBA,w,h);
+		std::string filterValue = get_string_value(ctx,fboValue.get("filtering","nearest"));
+		GLenum texFilter = (filterValue=="linear" || filterValue=="LINEAR") ? GL_LINEAR : GL_NEAREST;
+		if( ctx->verbose ) { std::cout<<"Add Frame Buffer Object '"<<name<<"' : "<<w<<"x"<<h<<" : "<<((texFilter==GL_NEAREST)?"NEAREST":"LINEAR")<<"\n"; }
+		FrameBufferObject* fbo = add_fbo(ctx->ip,name,GL_RGBA,w,h,texFilter);
 		fbo->render_window = ctx->render_window;
 	}
 	

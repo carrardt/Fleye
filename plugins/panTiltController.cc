@@ -31,9 +31,9 @@ struct panTiltController : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{
 		
-		 float theta = atan( (std::cos( ctx->frameCounter*0.02 )) /4.0 ) ;
-		 float phi = atan( (std::sin( ctx->frameCounter*0.02 )) /4.0 ) ;
-		 gpio_write_theta_phi(theta,phi, ctx->frameCounter%2 );
+		 float theta = atan( (std::cos( ctx->frameCounter*0.04 )) /1.5 ) ;
+		 float phi = atan( (std::sin( ctx->frameCounter*0.04 )) /1.5 ) ;
+		 gpio_write_theta_phi(theta,phi, 0/*ctx->frameCounter%2*/ );
 	}
 	
 	void gpio_write_xy_i(unsigned int xi, unsigned int yi, bool laser)
