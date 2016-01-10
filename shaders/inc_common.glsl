@@ -19,7 +19,7 @@ vec3 hue_to_rgb(float x)
 
 vec3 rgb_to_yuv( vec3 c )
 {
-	return vec3( 0.299*c.x+0.587*c.y+0.114*c.z, 0.500*c.x-0.419*c.y-0.081*c.z, -0.169*c.x-0.331*c.y+0.500*c.z );
+	return vec3( 0.299*c.x+0.587*c.y+0.114*c.z, -0.147*c.x - 0.289*c.y + 0.436*c.z, 0.615*c.x - 0.515*c.y - 0.100*c.z );
 }
 
 vec3 yuv_to_rgb( vec3 yuv )

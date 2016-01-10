@@ -93,8 +93,8 @@
 		}
 		,
 		"gpu-display-motion" : { 
-			"fragment-shader" : "texture_fs" , 
-			"textures" : { "tex" : "fbo-final-4" }
+			"fragment-shader" : "drawMotionVector_fs" , 
+			"textures" : { "tex_mv" : "fbo-final-4", "tex_camera" : "fbo-filter" }
 		}
 		,
 		"gpu-display-text" : { 
