@@ -7,7 +7,7 @@ void main()
 	vec3 Sl3 = texture2D(tex_nr1, vec2(tc.x, tc.y-step.y*3.0) ).xyz;
 	vec3 Sl2 = texture2D(tex_nr1, vec2(tc.x, tc.y-step.y*2.0) ).xyz;
 	vec3 Sl1 = texture2D(tex_nr1, vec2(tc.x, tc.y-step.y) ).xyz;
-	vec4 S = texture2D(tex, tc );
+	vec4 S = texture2D(tex_nr1, tc );
 	vec3 Sr1 = texture2D(tex_nr1, vec2(tc.x, tc.y+step.y) ).xyz;
 	vec3 Sr2 = texture2D(tex_nr1, vec2(tc.x, tc.y+step.y*2.0) ).xyz;
 	vec3 Sr3 = texture2D(tex_nr1, vec2(tc.x, tc.y+step.y*3.0) ).xyz;
@@ -22,5 +22,5 @@ void main()
 	vec3 Original = texture2D(tex,tc).xyz;
 
 	gl_FragColor.xyz = edgeDetect*Original + (1.0-edgeDetect)*vGauss;
-	gl_FragColor.w = edgeDetect; // might be useful
+	gl_FragColor.w = S.w; // might be useful
 }

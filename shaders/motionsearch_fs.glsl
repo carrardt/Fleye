@@ -1,16 +1,16 @@
-float computeSimilarity( vec3 ref, vec2 tc, vec2 N )
+float computeSimilarity( vec4 A, vec4 B )
 {
-	vec3 Diff = texture2D(tex, tc + N*step ).xyz - ref;
-	float s = 1.0 - max( max( abs(Diff.x) , abs(Diff.y) ) , abs(Diff.z) );
-	return s;
+	vec3 d = vec3(1.0,1.0,1.0) - abs( B.xyz - A.xyz );
+	return dot(d,d);
 }
 
 void main(void)
 {
-	vec3 A = texture2D(texPrev, var_TexCoord ).xyz;
+	vec2 tc = var_TexCoord;
+	vec4 A = texture2D(texPrev, tc );
 
 	//vec3 B = texture2D(tex, texcoord ).xyz;
-	vec2 V0 = vec2(0.0,0.0);
+	//vec2 V0 = vec2(0.0,0.0);
 	vec2 V1 = vec2(-1.0,-1.0);
 	vec2 V2 = vec2(0.0,-1.0);
 	vec2 V3 = vec2(1.0,-1.0);
@@ -20,21 +20,26 @@ void main(void)
 	vec2 V7 = vec2(-1.0,1.0);
 	vec2 V8 = vec2(-1.0,0.0);
 
-	float S0 = computeSimilarity( A, var_TexCoord, V0 );
-	float S1 = computeSimilarity( A, var_TexCoord, V1 );
-	float S2 = computeSimilarity( A, var_TexCoord, V2 );
-	float S3 = computeSimilarity( A, var_TexCoord, V3 );
-	float S4 = computeSimilarity( A, var_TexCoord, V4 );
-	float S5 = computeSimilarity( A, var_TexCoord, V5 );
-	float S6 = computeSimilarity( A, var_TexCoord, V6 );
-	float S7 = computeSimilarity( A, var_TexCoord, V7 );
-	float S8 = computeSimilarity( A, var_TexCoord, V8 );
+	//float S0 = computeSimilarity( A, var_TexCoord, V0 );
+	float S1 = computeSimilarity( A, texture2D(tex,tc+V1*step) );
+	float S2 = computeSimilarity( A, texture2D(tex,tc+V2*step) );
+	float S3 = computeSimilarity( A, texture2D(tex,tc+V3*step) );
+	float S4 = computeSimilarity( A, texture2D(tex,tc+V4*step) );
+	float S5 = computeSimilarity( A, texture2D(tex,tc+V5*step) );
+	float S6 = computeSimilarity( A, texture2D(tex,tc+V6*step) );
+	float S7 = computeSimilarity( A, texture2D(tex,tc+V7*step) );
+	float S8 = computeSimilarity( A, texture2D(tex,tc+V8*step) );
+	
+	/*float MinS = min( min( min(S1,S2) , min(S3,S4) ) , min( min(S5,S6) , min(S7,S8) ) );
+	float MaxS = max( max( max(S1,S2) , max(S3,S4) ) , max( max(S5,S6) , max(S7,S8) ) );
+	float SDiff = MaxS - MinS;*/
 
-	vec2 mv = (1.0-S0) * ( S1*V1 + S2*V2 + S3*V3 + S4*V4 + S5*V5 + S6*V6 + S7*V7 + S8*V8 );
+	vec2 mv = S1*V1 + S2*V2 + S3*V3 + S4*V4 + S5*V5 + S6*V6 + S7*V7 + S8*V8 ;
+	float l = length(mv);
 	mv = normalize(mv);
 
-	gl_FragColor.xy = mv*0.5+vec2(0.5,0.5);
-	gl_FragColor.z = (1.0-S0) * (S1+S2+S3+S4+S5+S6+S7+S8)*0.03125;
-	gl_FragColor.w = 1.0;
+	gl_FragColor.xy = vec2(mv.x*0.5+0.5,mv.y*0.5+0.5);
+	gl_FragColor.z = l;
+	gl_FragColor.w = A.w; // edge detection from noise filter
 }
  

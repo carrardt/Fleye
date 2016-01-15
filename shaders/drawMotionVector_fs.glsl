@@ -2,8 +2,6 @@
 void main()
 {
 	vec4 M = texture2D(tex_mv,var_TexCoord);
-	vec2 mv = M.xy;
-	float s = M.z;
 	vec3 C = texture2D(tex_camera,var_TexCoord).xyz;
 	vec3 yuv = rgb_to_yuv( C );
 	//yuv.x -= 0.5;
@@ -11,6 +9,6 @@ void main()
 	//yuv.z += 0.5;
 	//float Y = dot( C , vec3(0.299,0.587,0.114) );
 	
-	gl_FragColor.xyz = yuv_to_rgb( vec3(s,mv.x*s,mv.y*s) );
+	gl_FragColor.xyz = yuv_to_rgb( vec3(M.z,M.x*M.z,M.y*M.z) );
 	gl_FragColor.w = 1.0;
 }
