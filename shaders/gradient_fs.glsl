@@ -15,6 +15,7 @@ void main()
 	vec4 Au = lookup_Tex( vec2(var_TexCoord.x,var_TexCoord.y+step.y) );
 	vec4 Al = lookup_Tex( vec2(var_TexCoord.x-step.x,var_TexCoord.y) );
 	vec4 Ar = lookup_Tex( vec2(var_TexCoord.x+step.x,var_TexCoord.y) );
+	
 	vec4 Ax = abs( ( (A-Al) + (Ar-A) ) *0.5 );
 	vec4 Ay = abs( ( (A-Ab) + (Au-A) ) *0.5 );
 	vec4 Ad = max(Ax,Ay);

@@ -39,7 +39,7 @@ struct drawTrackingPos : public FleyePlugin
 			float y = ( p.second->posY*W - 0.5f ) * 2.0f ;
 			float h = i / N;
 			//std::cout<<i<<" : x="<<x<<", y="<<y<<", W="<<W<< "\n";
-			drawCross(cs,x,y,h);
+			drawObject(cs,x,y,p.second->speedX, p.second->speedY, h);
 			++i;
 		}
 
@@ -47,10 +47,11 @@ struct drawTrackingPos : public FleyePlugin
 		cs->disableVertexArray(FLEYE_GL_VERTEX);
 	}
 
-	void drawCross(struct CompiledShader* cs, float posx, float posy, float hue)
+	void drawObject(struct CompiledShader* cs, float posx, float posy, float sx, float sy, float hue)
 	{
-		GLfloat varray[8];
-		GLfloat carray[16];
+		GLfloat varray[12];
+		GLfloat carray[24];
+		int nv = 4;
 		for(int i=0;i<4;i++)
 		{
 			int x = i%2;
@@ -65,9 +66,22 @@ struct drawTrackingPos : public FleyePlugin
 			carray[i*4+2] = fabsf(0.5f-hue);
 			carray[i*4+3] = 1.0f;
 		}
+		if( sx!=0.0 || sy!=0.0 )
+		{
+			varray[4*2+0] = posx;
+			varray[4*2+1] = posy;
+			varray[4*2+2] = posx+sx;
+			varray[4*2+3] = posy+sy;
+			for(int i=0;i<8;i++) carray[4*4+i] = carray[i];
+			nv = 6;
+		}
+		else
+		{
+			std::cout<<"no speed\n";
+		}
 		cs->vertexAttribPointer(FLEYE_GL_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, varray);
 		cs->vertexAttribPointer(FLEYE_GL_COLOR, 4, GL_FLOAT, GL_FALSE, 0, carray);
-		glDrawArrays(GL_LINES, 0, 4);
+		glDrawArrays(GL_LINES, 0, nv);
 	}
 	
 	TrackingService* m_track_svc;

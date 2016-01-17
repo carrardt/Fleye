@@ -1,24 +1,56 @@
+vec3 chooseMV(vec3 A, vec3 B)
+{
+	if( A.z >= B.z ) return A;
+	else return B;
+}
 
 void main(void)
 {
 	vec2 tc = var_TexCoord;
+	/*
 	vec4 MV =(texture2D(tex_mv, vec2(tc.x-step.x*0.25,tc.y-step.y*0.25) )
 			+ texture2D(tex_mv, vec2(tc.x+step.x*0.25,tc.y-step.y*0.25) )
 			+ texture2D(tex_mv, vec2(tc.x-step.x*0.25,tc.y+step.y*0.25) )
 			+ texture2D(tex_mv, vec2(tc.x+step.x*0.25,tc.y+step.y*0.25) ) )*0.25;
 
+
+	vec2 mvec1 = MV.xy; //*2.0 - vec2(1.0,1.0);
+	vec2 mvec4 = MV4.xy; //*2.0 - vec2(1.0,1.0);
+	vec2 mvec16 = MV16.xy; //*2.0 - vec2(1.0,1.0);
+*/
+
+	vec4 MVa = texture2D(tex_mv, vec2(tc.x-step.x*0.25,tc.y-step.y*0.25) );
+	vec4 MVb = texture2D(tex_mv, vec2(tc.x+step.x*0.25,tc.y-step.y*0.25) );
+	vec4 MVc = texture2D(tex_mv, vec2(tc.x-step.x*0.25,tc.y+step.y*0.25) );
+	vec4 MVd = texture2D(tex_mv, vec2(tc.x+step.x*0.25,tc.y+step.y*0.25) );
+
 	vec4 MV4 = texture2D(tex_mv4, var_TexCoord );
 	vec4 MV16 = texture2D(tex_mv16, var_TexCoord );
 
-	vec2 mvec1 = vec2( MV.x-0.5 , MV.y-0.5 );
-	vec2 mvec4 = vec2( MV4.x-0.5 , MV4.y-0.5 );
-	vec2 mvec16 = vec2( MV16.x-0.5 , MV16.y-0.5 );
+	vec3 SelectedMV = (MVa.xyz + MVb.xyz + MVc.xyz + MVd.xyz)*0.25 ; //chooseMV( chooseMV(MVc.xyz,MVd.xyz) , chooseMV(MVa.xyz,MVb.xyz) );
+	//SelectedMV = chooseMV( SelectedMV , MV4.xyz );
+	//SelectedMV = chooseMV( SelectedMV , MV16.xyz );
+	SelectedMV = MV4.xyz;
+	
+	/*if( MV4.z > l )
+	{
+		mv = mvec4;
+		l = MV4.z;
+	}
+	if( MV16.z > l )
+	{
+		mv = mvec16;
+		l = MV16.z;
+	}*/
+	
+	vec2 mv = SelectedMV.xy;
+	float l = SelectedMV.z;
+	
+	//mv = normalize(mv);
+	//mv = mv*0.5 + vec2(0.5,0.5);
 
-	vec2 mv = mvec1*MV.z + mvec4*4.0*MV4.z + mvec16*MV16.z*16.0;
-	mv = normalize(mv);
-
-	gl_FragColor.xy = MV.xy; // negative values are truncated, for debug
-	gl_FragColor.z = MV.z;
-	gl_FragColor.w = MV.w;
+	gl_FragColor.xy = mv.xy; // negative values are truncated, for debug
+	gl_FragColor.z = l;
+	gl_FragColor.w = 1.0;
 }
  

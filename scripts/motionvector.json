@@ -5,19 +5,17 @@
 		"bitmapfont" : { }
 	}
 	,
+	"RenderBuffers" :
+	{
+		"mv-render-buffer" : {}
+	}
+	,
 	"FrameBufferObjects" :
 	{
-		  "fbo-nr1"       : { "width" : 512, "height" : 512 }
-		, "fbo-filter"    : { "width" : 512, "height" : 512 , "filtering" : "linear"}
-		, "fbo-filter-4"  : { "width" : 128, "height" : 128 , "filtering" : "linear" }
-		, "fbo-filter-16" : { "width" : 32, "height" : 32 }
-		, "fbo-prev"      : { "width" : 512, "height" : 512 }
-		, "fbo-prev-4"    : { "width" : 128, "height" : 128 }
-		, "fbo-prev-16"   : { "width" : 32, "height" : 32 }
-		, "fbo-mv"        : { "width" : 512, "height" : 512 }
-		, "fbo-mv-4"      : { "width" : 128, "height" : 128 }
-		, "fbo-mv-16"     : { "width" : 32, "height" : 32 , "filtering" : "linear" }
-		, "fbo-final-4"   : { "width" : 128, "height" : 128 }
+		  "fbo-filter"  : { "width" : 128, "height" : 128 , "filtering" : "linear"}
+		, "fbo-prev"    : { "width" : 128, "height" : 128 }
+		, "fbo-mv"      : { "width" : 128, "height" : 128 }
+		, "fbo-final"   : { "width" : 128, "height" : 128 }
 	}
     ,
     "GLShaders" :
@@ -27,27 +25,15 @@
 		"gpu-remove-noise-1" : {
 			"fragment-shader" : "noiseRemoval1_fs" ,
 			"textures" : { "tex" : "CAMERA"  } ,
-			"output" : "fbo-nr1"
+			"output" : "fbo-mv"
 		}
 		,
 		// 2nd one computes the vertical part of the convolution and blend the result with orginal image
 		// using the edge detection metric
 		"gpu-remove-noise-2" : {
-			"fragment-shader" : "noiseRemoval2_fs" ,
-			"textures" : { "tex" : "CAMERA" , "tex_nr1" : "fbo-nr1" } ,
-			"output" : "fbo-filter"
-		}
-		,
-		"gpu-decimate-4" : {
-			"fragment-shader" : "decimateLinear4_fs" ,
-			"textures" : { "tex" : "fbo-filter" } ,
-			"output" : "fbo-filter-4"
-		}
-		,
-		"gpu-decimate-16" : {
-			"fragment-shader" : "decimateLinear4_fs" ,
-			"textures" : { "tex" : "fbo-filter-4" } ,
-			"output" : "fbo-filter-16"
+			"fragment-shader" : "noiseRemoval2_fs" 
+			, "textures" : { "tex" : "CAMERA" , "tex_nr1" : "fbo-mv" } 
+			, "output" : "fbo-filter"
 		}
 		,
 		"gpu-motion-search" : {
@@ -56,45 +42,26 @@
 			"output" : "fbo-mv"
 		}
 		,
-		"gpu-motion-search-4" : {
-			"fragment-shader" : "motionsearch_fs" ,
-			"textures" : { "tex" : "fbo-filter-4", "texPrev" : "fbo-prev-4" } ,
-			"output" : "fbo-mv-4"
-		}
-		,
-		"gpu-motion-search-16" : {
-			"fragment-shader" : "motionsearch_fs" ,
-			"textures" : { "tex" : "fbo-filter-16", "texPrev" : "fbo-prev-16" } ,
-			"output" : "fbo-mv-16"
-		}
-		,
-		"gpu-motion-avg" : {
-			"fragment-shader" : "motionavg_fs" ,
-			"textures" : { "tex_mv" : "fbo-mv", "tex_mv4" : "fbo-mv-4", "tex_mv16" : "fbo-mv-16" } ,
-			"output" : "fbo-final-4"
-		}
-		,
 		"gpu-copy-prev" : {
 			"fragment-shader" : "texture_fs" ,
 			"textures" : { "tex" : "fbo-filter" } ,
 			"output" : "fbo-prev" 
 		}
 		,
-		"gpu-copy-prev-4" : {
-			"fragment-shader" : "texture_fs" ,
-			"textures" : { "tex" : "fbo-filter-4" } ,
-			"output" : "fbo-prev-4" 
-		}
-		,
-		"gpu-copy-prev-16" : {
-			"fragment-shader" : "texture_fs" ,
-			"textures" : { "tex" : "fbo-filter-16" } ,
-			"output" : "fbo-prev-16" 
+		"gpu-copy-motion" : {
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "fbo-mv" } ,
+			"output" : "mv-render-buffer"
 		}
 		,
 		"gpu-display-motion" : { 
 			"fragment-shader" : "drawMotionVector_fs" , 
-			"textures" : { "tex_mv" : "fbo-final-4", "tex_camera" : "fbo-filter" }
+			"textures" : { "tex_mv" : "fbo-mv", "tex_camera" : "fbo-filter" }
+		}
+		,
+		"gpu-display-tracking" : {
+			"fragment-shader" : "color_fs" ,
+			"rendering" : "drawTrackingPos"
 		}
 		,
 		"gpu-display-text" : { 
@@ -117,23 +84,25 @@
 			"plugin" : "panTiltController" ,
 			"thread-id" : 0
 		}
+		,
+		"cpu-motion-vector" : 
+		{ 
+			"plugin" : "motionVector" ,
+			"thread-id" : 0
+		}
     }
     ,
     "ProcessingLoop" : [
 		  "cpu-print-fps"
-		//, "cpu-pan-tilt"
+		, "cpu-pan-tilt"
 		, "gpu-remove-noise-1"
 		, "gpu-remove-noise-2"
-		, "gpu-decimate-4"
-		, "gpu-decimate-16"
 		, "gpu-motion-search"
-		, "gpu-motion-search-4"
-		, "gpu-motion-search-16"
-		, "gpu-motion-avg"
+		, "gpu-copy-motion"
+		, "cpu-motion-vector"
 		, "gpu-display-motion"
-		, "gpu-display-text"
 		, "gpu-copy-prev"
-		, "gpu-copy-prev-4"
-		, "gpu-copy-prev-16"
+		, "gpu-display-tracking"
+		, "gpu-display-text"
 		]
 }

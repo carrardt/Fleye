@@ -9,6 +9,13 @@ void main()
 	//yuv.z += 0.5;
 	//float Y = dot( C , vec3(0.299,0.587,0.114) );
 	
-	gl_FragColor.xyz = yuv_to_rgb( vec3(M.z,M.x*M.z,M.y*M.z) );
+	float edge = M.w;
+	float mq = M.z;
+	vec2 mv = M.xy;
+
+	//mq = mq*(1.0-edge);
+
+
+	gl_FragColor.xyz = yuv_to_rgb( vec3(mq,mv.x*mq,mv.y*mq) );
 	gl_FragColor.w = 1.0;
 }
