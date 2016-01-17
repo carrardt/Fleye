@@ -31,8 +31,10 @@
 		// 2nd one computes the vertical part of the convolution and blend the result with orginal image
 		// using the edge detection metric
 		"gpu-remove-noise-2" : {
-			"fragment-shader" : "noiseRemoval2_fs" 
-			, "textures" : { "tex" : "CAMERA" , "tex_nr1" : "fbo-mv" } 
+			//"fragment-shader" : "noiseRemoval2_fs" 
+			//, "textures" : { "tex" : "CAMERA" , "tex_nr1" : "fbo-mv" } 
+			  "fragment-shader" : "texture_fs" 
+			, "textures" : { "tex" : "CAMERA" } 
 			, "output" : "fbo-filter"
 		}
 		,
@@ -55,8 +57,10 @@
 		}
 		,
 		"gpu-display-motion" : { 
-			"fragment-shader" : "drawMotionVector_fs" , 
-			"textures" : { "tex_mv" : "fbo-mv", "tex_camera" : "fbo-filter" }
+			//"fragment-shader" : "drawMotionVector_fs" , 
+			//"textures" : { "tex_mv" : "fbo-mv", "tex_camera" : "fbo-filter" }
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "fbo-filter" }
 		}
 		,
 		"gpu-display-tracking" : {

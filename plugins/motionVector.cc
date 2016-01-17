@@ -28,45 +28,51 @@
 
 struct motionVector : public FleyePlugin
 {
-	inline motionVector() : render_buffer(0), obj(0) {}
-	
+	inline motionVector() : render_buffer(0), obj(0)
+	{
+		for(int i=0;i<4;i++)
+		{
+			corner[i] = 0;
+		}
+	}
+
 	void setup(FleyeContext* ctx)
 	{
 		render_buffer = ctx->ip->getRenderBuffer("mv-render-buffer");
 		TrackingService* track_svc = TrackingService_instance();
 		obj = track_svc->addTrackedObject(0);
-		/*obj00 = track_svc->addTrackedObject(1);
-		obj01 = track_svc->addTrackedObject(2);
-		obj10 = track_svc->addTrackedObject(3);
-			obj11 = track_svc->addTrackedObject(4);*/
+		obj->posX = 0.5 ;
+		obj->posY = 0.5 ;
+		obj->area = 1;
+		obj->weight = 1;
+
+		for(int i=0;i<4;i++)
+		{
+			corner[i] = track_svc->addTrackedObject(i+1);
+			corner[i]->posX = 0.25 + (i%2)*0.5;
+			corner[i]->posY = 0.25 + (i/2)*0.5;
+			corner[i]->area = 1;
+			corner[i]->weight = 1;
+		}
+
 		std::cout<<"motionVector setup : render_buffer="<<render_buffer<< "\n";
 	}
 
 	void run(FleyeContext* ctx, int threadId /*, frameCount */)
-	{		
-		// in case alternate render buffers are used, switch between the two
+	{
 		const uint32_t* base_ptr = 0;
-
-		/*DECLARE_MINMAX_STAT(m0);
-		DECLARE_MINMAX_STAT(m1);
-		DECLARE_MINMAX_STAT(m2);
-		DECLARE_MINMAX_STAT(m3);*/
-		double sumX = 0;
-		double sumY = 0;
-		//float sumL = 0;
-
 		int width = render_buffer->width();
 		int height = render_buffer->height();
-		//std::cout<<width<<'x'<<height<<"\n";
 		render_buffer->copyToBuffer(0,0,width,height);
 		base_ptr = (const uint32_t*) render_buffer->getCopyBuffer();
-		//std::cout<<"ptr="<<base_ptr<< "\n"; std::cout.flush();
-
 		for(uint32_t y=0;y<height;y++)
 		{
 			const uint32_t* p = base_ptr + y*width;
+			int cy = y<(height/2) ? 0 : 1;
 			for(uint32_t x=0;x<width;x++)
 			{
+				int cx = x<(width/2) ? 0 : 1;
+				int c = cy*2+cx;
 				uint32_t value = p[x];
 				uint32_t mx = ( value ) & 0x000000FF;
 				uint32_t my = ( value >> 8 ) & 0x000000FF;
@@ -75,38 +81,38 @@ struct motionVector : public FleyePlugin
 				double Sx = 0.00390625*mx;
 				double Sy = 0.00390625*my;
 				double L = 0.00390625*ml;
-				sumX += (Sx-0.5)*L;
-				sumY += (Sy-0.5)*L;
-				//sumL += L; 
-				
-				/*UPDATE_MINMAX_STAT(m0);
-				UPDATE_MINMAX_STAT(m1);
-				UPDATE_MINMAX_STAT(m2);*/
-				//int Yi = height - (y*2) - 1;
+				corner[c]->speedX += (Sx-0.5)*L;
+				corner[c]->speedY += (Sy-0.5)*L;
 			}
 		}
-
-		//std::cout<<"ok\n"; std::cout.flush();
-		
-		double L = sqrt( sumX*sumX + sumY*sumY );
+		obj->speedX=0.0;
+		obj->speedY=0.0;
+		for(int i=0;i<4;i++)
+		{
+			float sx= corner[i]->speedX;
+			float sy= corner[i]->speedY;
+			obj->speedX += sx;
+			obj->speedY += sy;
+			double L = sqrt( sx*sx + sy*sy );
+			L=8192.0;
+			if(L>1.0)
+			{
+				corner[i]->speedX /= (4.0*L);
+				corner[i]->speedY /= (4.0*L);
+			}
+		}
+		double L = sqrt( obj->speedX * obj->speedX + obj->speedY * obj->speedY );
+		L=8192.0; 
 		if(L>1.0)
 		{
-			sumX /= L;
-			sumY /= L;
+			obj->speedX /= (4.0*L);
+			obj->speedY /= (4.0*L);
 		}
-		std::cout <<sumX<<","<<sumY<<" l="<<L<<"\n";
-		
-		obj->posX = 0.5 ;
-		obj->posY = 0.5 ;
-		obj->speedX = sumX/4.0 ;
-		obj->speedY = sumY/4.0 ;
-		obj->area = 1;
-		obj->weight = 1;
-		obj->timestamp = ctx->frameCounter;
 	}
 	
 	FleyeRenderWindow* render_buffer;
 	TrackedObject* obj;
+	TrackedObject* corner[4];
 };
 
 FLEYE_REGISTER_PLUGIN(motionVector);

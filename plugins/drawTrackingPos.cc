@@ -14,11 +14,15 @@
 
 struct drawTrackingPos : public FleyePlugin
 {
-	inline drawTrackingPos() : m_track_svc(0) {}
+	static constexpr int BufferVertices = 256;
+	
+	inline drawTrackingPos() : m_track_svc(0), m_bufVertices(0), m_varray(0), m_carray(0) {}
 
 	void setup(struct FleyeContext* ctx)
 	{
 		m_track_svc = TrackingService_instance();
+		m_varray = new GLfloat[BufferVertices*2];
+		m_carray = new GLfloat[BufferVertices*3];
 		std::cout<<"drawTrackingPos: Tracking service @"<<m_track_svc<<"\n";
 	}
 
@@ -27,6 +31,9 @@ struct drawTrackingPos : public FleyePlugin
 		cs->enableVertexArray(FLEYE_GL_VERTEX);
 		cs->enableVertexArray(FLEYE_GL_COLOR);
 		
+		cs->vertexAttribPointer(FLEYE_GL_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, m_varray);
+		cs->vertexAttribPointer(FLEYE_GL_COLOR, 3, GL_FLOAT, GL_FALSE, 0, m_carray);
+
 		int i=0;
 		//std::cout<<"m_track_svc="<<m_track_svc<<"\n";
 		float N = m_track_svc->getTrackedObjects().size();
@@ -42,49 +49,54 @@ struct drawTrackingPos : public FleyePlugin
 			drawObject(cs,x,y,p.second->speedX, p.second->speedY, h);
 			++i;
 		}
-
+		flushVertices();
+		
 		cs->disableVertexArray(FLEYE_GL_COLOR);
 		cs->disableVertexArray(FLEYE_GL_VERTEX);
 	}
 
+	void flushVertices()
+	{
+		if(m_bufVertices>0)
+		{
+			glDrawArrays(GL_LINES, 0, m_bufVertices);
+			m_bufVertices = 0;
+		}
+	}
+
 	void drawObject(struct CompiledShader* cs, float posx, float posy, float sx, float sy, float hue)
 	{
-		GLfloat varray[12];
-		GLfloat carray[24];
 		int nv = 4;
+		float color[3] = { 1.0f-hue, hue, fabsf(0.5f-hue) };
 		for(int i=0;i<4;i++)
 		{
 			int x = i%2;
 			int y = ((i/2)+x)%2;
 			double ox = x ? -0.05 : 0.05;
 			double oy = y ? -0.05 : 0.05;
-			varray[i*2+0] = posx +ox;
-			varray[i*2+1] = posy +oy;
-			
-			carray[i*4+0] = 1.0f-hue;
-			carray[i*4+1] = hue;
-			carray[i*4+2] = fabsf(0.5f-hue);
-			carray[i*4+3] = 1.0f;
+			m_varray[m_bufVertices*2+0] = posx +ox;
+			m_varray[m_bufVertices*2+1] = posy +oy;
+			for(int i=0;i<3;i++) m_carray[m_bufVertices*3+i] = color[i];
+			++ m_bufVertices;
 		}
 		if( sx!=0.0 || sy!=0.0 )
 		{
-			varray[4*2+0] = posx;
-			varray[4*2+1] = posy;
-			varray[4*2+2] = posx+sx;
-			varray[4*2+3] = posy+sy;
-			for(int i=0;i<8;i++) carray[4*4+i] = carray[i];
-			nv = 6;
+			m_varray[m_bufVertices*2+0] = posx;
+			m_varray[m_bufVertices*2+1] = posy;
+			for(int i=0;i<3;i++) m_carray[m_bufVertices*3+i] = color[i];
+			++m_bufVertices;
+			m_varray[m_bufVertices*2+0] = posx+sx;
+			m_varray[m_bufVertices*2+1] = posy+sy;
+			for(int i=0;i<3;i++) m_carray[m_bufVertices*3+i] = color[i];
+			++m_bufVertices;
 		}
-		else
-		{
-			std::cout<<"no speed\n";
-		}
-		cs->vertexAttribPointer(FLEYE_GL_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, varray);
-		cs->vertexAttribPointer(FLEYE_GL_COLOR, 4, GL_FLOAT, GL_FALSE, 0, carray);
-		glDrawArrays(GL_LINES, 0, nv);
+		if( m_bufVertices >= (BufferVertices-6) ) { flushVertices(); }
 	}
 	
 	TrackingService* m_track_svc;
+	int m_bufVertices; 
+	GLfloat* m_varray;
+	GLfloat* m_carray;
 };
 
 FLEYE_REGISTER_PLUGIN(drawTrackingPos);
