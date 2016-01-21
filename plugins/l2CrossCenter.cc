@@ -68,8 +68,8 @@ struct l2CrossCenter : public FleyePlugin
 		//if(render_buffer_odd==0 || render_buffer_even==0) { use_glRead = true; }
 		
 		TrackingService* track_svc = TrackingService_instance();
-		obj1 = track_svc->addTrackedObject(0);
-		obj2 = track_svc->addTrackedObject(1);		
+		obj1 = track_svc->getTrackedObject(0);
+		obj2 = track_svc->getTrackedObject(1);		
 		std::cout<<"L2CrossCenter setup : render_buffer_odd="<<render_buffer_odd<<", render_buffer_even="<<render_buffer_even 
 				 <<", obj1="<<obj1<<", obj2="<<obj2<< "\n";
 	}

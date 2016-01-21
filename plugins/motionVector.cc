@@ -40,7 +40,7 @@ struct motionVector : public FleyePlugin
 	{
 		render_buffer = ctx->ip->getRenderBuffer("mv-render-buffer");
 		TrackingService* track_svc = TrackingService_instance();
-		obj = track_svc->addTrackedObject(0);
+		obj = track_svc->getTrackedObject(0);
 		obj->posX = 0.5 ;
 		obj->posY = 0.5 ;
 		obj->area = 1;
@@ -48,7 +48,7 @@ struct motionVector : public FleyePlugin
 
 		for(int i=0;i<4;i++)
 		{
-			corner[i] = track_svc->addTrackedObject(i+1);
+			corner[i] = track_svc->getTrackedObject(i+1);
 			corner[i]->posX = 0.25 + (i%2)*0.5;
 			corner[i]->posY = 0.25 + (i/2)*0.5;
 			corner[i]->area = 1;
@@ -94,19 +94,19 @@ struct motionVector : public FleyePlugin
 			obj->speedX += sx;
 			obj->speedY += sy;
 			double L = sqrt( sx*sx + sy*sy );
-			L=8192.0;
-			if(L>1.0)
+			//L=4096.0;
+			//if(L>1.0)
 			{
-				corner[i]->speedX /= (4.0*L);
-				corner[i]->speedY /= (4.0*L);
+				corner[i]->speedX /= (width*height)/4; //(4.0*L);
+				corner[i]->speedY /= (width*height)/4; //(4.0*L);
 			}
 		}
 		double L = sqrt( obj->speedX * obj->speedX + obj->speedY * obj->speedY );
-		L=8192.0; 
-		if(L>1.0)
+		//L=4096.0; 
+		//if(L>1.0)
 		{
-			obj->speedX /= (4.0*L);
-			obj->speedY /= (4.0*L);
+			obj->speedX /= (width*height); //(4.0*L);
+			obj->speedY /= (width*height); //(4.0*L);
 		}
 	}
 	

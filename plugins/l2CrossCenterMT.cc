@@ -28,8 +28,8 @@ struct l2CrossCenterMT : public FleyePlugin
 		}
 
 		TrackingService* track_svc = TrackingService_instance();
-		obj1 = track_svc->addTrackedObject(0);
-		obj2 = track_svc->addTrackedObject(1);
+		obj1 = track_svc->getTrackedObject(0);
+		obj2 = track_svc->getTrackedObject(1);
 		
 		memset(&mutex,0,sizeof(mutex));
 		assert( vcos_mutex_create(&mutex,"l2CrossMutex") == VCOS_SUCCESS );

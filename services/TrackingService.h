@@ -4,8 +4,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "fleye/service.h"
+#include <cmath>
 
+#include "fleye/service.h"
 
 struct TrackedObject
 {
@@ -16,6 +17,7 @@ struct TrackedObject
 	uint32_t priority;
 	uint32_t timestamp;
 	const uint32_t objectId;
+	
 	inline TrackedObject(uint32_t id)
 		: posX(0.0f)
 		, posY(0.0f)
@@ -26,13 +28,16 @@ struct TrackedObject
 		, priority(0)
 		, timestamp(0)
 		, objectId(id) {}
+		
+	inline float speed() const { return std::sqrt(speedX*speedX+speedY*speedY); }
 };
 
 class TrackingService : public FleyeService
 {
   public:  
-	inline TrackedObject* addTrackedObject(uint32_t id)
+	inline TrackedObject* getTrackedObject(uint32_t id)
 	{
+		if( m_trackedObjects.find(id) != m_trackedObjects.end() ) { return m_trackedObjects[id]; }
 		TrackedObject* t = new TrackedObject(id);
 		m_trackedObjects[id] = t;
 		return t;
