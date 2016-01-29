@@ -28,7 +28,7 @@
 
 struct motionVector : public FleyePlugin
 {
-	inline motionVector() : render_buffer(0), obj(0)
+	inline motionVector() : render_buffer(0)
 	{
 		for(int i=0;i<4;i++)
 		{
