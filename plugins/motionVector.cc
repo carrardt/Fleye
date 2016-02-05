@@ -88,8 +88,8 @@ struct motionVector : public FleyePlugin
 			//L=4096.0;
 			//if(L>1.0)
 			{
-				corner[i]->speedX /= (width*height)/4; //(4.0*L);
-				corner[i]->speedY /= (width*height)/4; //(4.0*L);
+				corner[i]->speedX /= (width*height)/16; //(4.0*L);
+				corner[i]->speedY /= (width*height)/16; //(4.0*L);
 			}
 		}
 	}

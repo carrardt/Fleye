@@ -83,6 +83,18 @@
 			"thread-id" : 0
 		}
 		,
+		"cpu-camera-calibration" : 
+		{ 
+			"plugin" : "panTiltCameraCalibration" ,
+			"thread-id" : 0
+		}
+		,
+		"cpu-pan-tilt" : 
+		{ 
+			"plugin" : "panTiltController" ,
+			"thread-id" : 0
+		}
+		,
 		"cpu-motion-vector" : 
 		{ 
 			"plugin" : "motionVector" ,
@@ -92,6 +104,8 @@
     ,
     "ProcessingLoop" : [
 		  "cpu-print-fps"
+		, "cpu-camera-calibration"
+		, "cpu-pan-tilt"
 		, "gpu-remove-noise-1"
 		, "gpu-remove-noise-2"
 		, "gpu-motion-search"
