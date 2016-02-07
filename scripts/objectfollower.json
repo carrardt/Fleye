@@ -1,0 +1,113 @@
+// green / red objects tracking
+// Example usage :
+// ./Fleye/fleye -ex fixedfps -res 960x720 -geom 960x720+32+32 -script l2crosscenter
+// => 18 fps
+{
+	"EnvDefaults" :
+	{
+		  "CCMD" : 5
+		, "MaskFunc" : "L2CrossRedGreenMask_fs"
+	}
+	,
+	"Textures" :
+	{
+		"bitmapfont" : { }
+	}
+	,
+	"RenderBuffers" :
+	{
+		"l2c-render-buffer" : {}
+	}
+	,
+	"FrameBufferObjects" :
+	{
+		"fbo1" : {} ,
+		"fbo2" : {}
+	}
+    ,
+    "GLShaders" :
+    {
+		"gpu-l2cross-init" : {
+			"fragment-shader" : [ "L2CrossCommon_fs", "$MaskFunc", "L2CrossInit_fs" ] 
+			, "textures" : { "tex" : "CAMERA" } 
+			, "output" : "fbo1"
+		}
+		,
+		"gpu-l2cross-iteration" : {
+			"fragment-shader" : [ "L2CrossCommon_fs", "L2CrossIteration_fs" ]
+			, "textures" : { "tex" : ["fbo1","fbo2"] } 
+			, "output" : ["fbo2","fbo1"] 
+			, "passes" : "$CCMD"
+		}
+		,
+		"gpu-l2cross-final" : {
+			"fragment-shader" : [ "L2CrossCommon_fs", "L2CrossFinal3_fs" ]
+			, "textures" : { "tex" : "gpu-l2cross-iteration" }
+			, "rendering" : "drawThirdHeight"
+			, "passStart" : "$CCMD"
+			, "output" : "l2c-render-buffer"
+		}
+		,
+		"gpu-display-masking" : {
+			"fragment-shader" : "drawL2Cross_fs" ,
+			"textures" : { "tex_l2cross" : "gpu-l2cross-iteration" , "tex_camera" : "CAMERA" }
+		}
+		,
+		"gpu-display-position" : {
+			"fragment-shader" : "color_fs" ,
+			"rendering" : "drawTrackingPos"
+		}
+		,
+		"gpu-display-fps" : { 
+			"fragment-shader" : "texture_fs" , 
+			"textures" : { "tex" : "bitmapfont" } ,
+			"rendering" : "drawText"
+		}
+    }
+    ,
+    "CPUFunctions" :
+    {
+		"cpu-l2CrossCenter" : {
+			"plugin" : "l2CrossCenter" , 
+			"thread-id" : 1 // will schedule multiple instance of this task on every cpu worker thread
+		}
+		,
+		"cpu-print-fps" : 
+		{ 
+			"plugin" : "printFPS" ,
+			"thread-id" : 2 // scheduled on one thread only, any available one
+		}
+		,
+		"cpu-follower" : 
+		{ 
+			"plugin" : "PanTiltFollower" ,
+			"thread-id" : 1
+		}
+		,
+		"cpu-pan-tilt" : 
+		{ 
+			"plugin" : "panTiltController" ,
+			"thread-id" : 1
+		}
+		,
+		"cpu-syncThread" :
+		{ 
+			"plugin" : "syncThread" ,
+			"thread-id" : "main"
+		}
+    }
+    ,
+    "ProcessingLoop" : [
+		  "cpu-print-fps" 
+		, "gpu-l2cross-init"
+		, "gpu-l2cross-iteration"
+		, "gpu-l2cross-final"
+		, "cpu-l2CrossCenter"
+		, "cpu-follower"
+		, "cpu-pan-tilt"
+		, "gpu-display-masking"
+		, "cpu-syncThread"
+		, "gpu-display-fps"
+		, "gpu-display-position"
+		]
+}

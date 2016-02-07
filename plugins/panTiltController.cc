@@ -27,6 +27,7 @@ struct panTiltController : public FleyePlugin
 			gpio_set_mode(i,OUTPUT_MODE);
 		}
 		m_ptsvc = PanTiltService_instance();
+		gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), 0);
 		std::cout<<"panTiltController ready, PanTiltService @"<<m_ptsvc<<"\n";
 	}
 

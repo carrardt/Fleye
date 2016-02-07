@@ -7,9 +7,11 @@ float obj1Mask(vec3 p)
 	float rbMax = max( p.x, p.z );
 	float rbMin = min( p.x, p.z );
 	float greenDiff = (p.y-rbMin);
-	float greenRatio = (p.y - rbMax) / (p.y-rbMin);
+//	float greenRatio = (p.y - rbMax) / (p.y-rbMin);
+	float greenRatio = (p.y - rbMax) / rbMax;
 
-	if( greenDiff>0.05 && greenRatio>greenThreshold ) return 1.0;
+//	if( greenDiff>0.05 && greenRatio>greenThreshold ) return 1.0;
+	if( greenDiff>0.25 && greenRatio>greenThreshold ) return 1.0;
 	else return 0.0;
 }
 

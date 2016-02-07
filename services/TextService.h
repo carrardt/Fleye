@@ -7,6 +7,16 @@
 #include <sstream>
 #include "fleye/service.h"
 
+struct StringStreamHelper : public std::ostringstream
+{
+	inline StringStreamHelper() : m_string(0) {}
+	inline StringStreamHelper( const StringStreamHelper& ssh ) : m_string(ssh.m_string) {}
+	inline StringStreamHelper( StringStreamHelper&& ssh ) : m_string(std::move(ssh.m_string)) { ssh.m_string=0; }
+	inline StringStreamHelper( std::string* s ) : m_string(s) {}
+	inline ~StringStreamHelper() { if(m_string!=0) *m_string = str(); }
+	std::string * m_string;
+};
+
 struct PositionnedText
 {
 	static constexpr int MaxSize = 1024;
@@ -15,6 +25,8 @@ struct PositionnedText
 	std::string text;
 	
 	inline PositionnedText() : x(0.0f), y(0.0f) { text[0]='\0'; }
+	
+	inline StringStreamHelper out() { return StringStreamHelper(&text); }
 	
 	inline void setText(std::string s)
 	{
