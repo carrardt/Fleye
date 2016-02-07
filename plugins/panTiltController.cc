@@ -34,6 +34,11 @@ struct panTiltController : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{		
 		 //std::cout<<m_ControlX<<" / "<<m_ControlY<<"\n";
+		 if( m_ptsvc->pan() < 0.0 ) m_ptsvc->setPan(0.0);
+		 else if( m_ptsvc->pan() > 1.0 ) m_ptsvc->setPan(1.0);
+		 if( m_ptsvc->tilt() < 0.0 ) m_ptsvc->setTilt(0.0);
+		 else if( m_ptsvc->tilt() > 1.0 ) m_ptsvc->setTilt(1.0);
+		 
 		 gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), 0);
 	}
 	
