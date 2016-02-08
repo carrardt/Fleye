@@ -15,71 +15,83 @@
 
 struct PanTiltFollower : public FleyePlugin
 {	
-	struct TrackingSample
+	struct Vec2f
 	{
-		float Px,Py;
-		float dPxdCx, dPydCx;
-		float dPxdCy, dPydCy;
+		float x,y;
+
+		inline Vec2f() : x(0.0f) , y(0.0f) {}
+		inline Vec2f(float u, float v) : x(u) , y(v) {}
+		inline Vec2f(const Vec2f& v) : x(v.x) , y(v.y) {}
+
+		inline Vec2f operator + (Vec2f v) const { return Vec2f(x+v.x,y+v.y); }
+		inline Vec2f operator - (Vec2f v) const { return Vec2f(x-v.x,y-v.y); }
+		inline Vec2f operator * (float s) const { return Vec2f(x*s,y*s); }
+		inline Vec2f operator / (float s) const { return Vec2f(x/s,y/s); }
 		
-		inline float dist2(float x, float y)
-		{
-			float vx = Px - x;
-			float vy = Py - y;
-			return vx*vx + vy*vy;
-		}
+		inline float norm2() const { return x*x+y*y; }
+		inline float norm() const { return sqrtf( norm2() ); }
+		inline float dist2(Vec2f v) const {	return (v-*this).norm2(); }
+		inline float dist(Vec2f v) const {	return (v-*this).norm(); }
+		
+		inline Vec2f normalize() const { return *this / norm(); }
+	};
+	
+	static inline float dot(Vec2f u, Vec2f v) { return u.x * v.x + u.y * v.y; }
+
+	static inline Vec2f weightedSum( Vec2f x1, Vec2f x2, Vec2f x3, float w1, float w2, float w3 )
+	{
+		return x1*w1 + x2*w2 + x3*w3;
+	}
+	
+	struct ScreenSample
+	{
+		Vec2f P;
+		Vec2f dPdCx;
+		Vec2f dPdCy;
 		
 		inline void normalize()
 		{
-			float s = 1.0f / sqrtf( dPxdCx*dPxdCx + dPydCx*dPydCx );
-			dPxdCx *= s; dPydCx *= s;
-			s = 1.0f / sqrtf( dPxdCy*dPxdCy + dPydCy*dPydCy );
-			dPxdCy *= s; dPydCy *= s;
+			dPdCx = dPdCx.normalize();
+			dPdCy = dPdCy.normalize();
 		}
 		
-		static inline TrackingSample interpolate( TrackingSample s1, TrackingSample s2, TrackingSample s3, float d1, float d2, float d3 )
+		inline void print()
 		{
-			TrackingSample r;
-			r.Px = s1.Px * d1 + s2.Px * d2 + s3.Px * d3 ;
-			r.Py = s1.Py * d1 + s2.Py * d2 + s3.Py * d3 ;
-			r.dPxdCx = s1.dPxdCx * d1 + s2.dPxdCx * d2 + s3.dPxdCx * d3 ;
-			r.dPydCx = s1.dPydCx * d1 + s2.dPydCx * d2 + s3.dPydCx * d3 ;
-			r.dPxdCy = s1.dPxdCy * d1 + s2.dPxdCy * d2 + s3.dPxdCy * d3 ;
-			r.dPydCy = s1.dPydCy * d1 + s2.dPydCy * d2 + s3.dPydCy * d3 ;
-			return r;
+			std::cout<<"P=("<<P.x<<','<<P.y<<") dPdCx=("<<dPdCx.x<<','<<dPdCx.y<<") dPdCy=("<<dPdCy.x<<','<<dPdCy.y<<")\n";
 		}
 	};
+
+	static inline ScreenSample weightedSum( ScreenSample s1, ScreenSample s2, ScreenSample s3, float w1, float w2, float w3 )
+	{
+		ScreenSample r;
+		r.P = weightedSum( s1.P, s2.P, s3.P, w1, w2, w3 );
+		r.dPdCx = weightedSum( s1.dPdCx, s2.dPdCx, s3.dPdCx, w1, w2, w3 );
+		r.dPdCy = weightedSum( s1.dPdCy, s2.dPdCy, s3.dPdCy, w1, w2, w3 );
+		return r;
+	}
 
 	struct CalibrationSample
 	{
-		inline float dist2(float x, float y)
-		{
-			float vx = Cx - x;
-			float vy = Cy - y;
-			return vx*vx + vy*vy;
-		}
-		
-		float Cx,Cy;
-		std::vector<TrackingSample> m_track;
+		Vec2f C;		
+		std::vector<ScreenSample> sgrid;
 	};
 
-
-	static inline float lineDist(float m1x, float m1y, float m2x, float m2y, float px, float py)
+	static inline float lineDist(Vec2f m1, Vec2f m2, Vec2f p)
 	{
-		float a = m1y - m2y;
-		float b = m2x - m1x;
+		Vec2f N( m1.y - m2.y , m2.x - m1.x );
 		// with this commented out, it becomes an oriented area, which is what we want for barycentric coordinates
-		/*float l = sqrtf( a*a + b*b );
-		a /= l;
-		b /= l;*/
-		float c = - ( a*m1x + b*m1y );
-		return a*px + b*py + c;
+		//N = N.normalize();
+		float c = - dot(N,m1); 
+		return dot(N,p) + c;
 	}
 
 	inline PanTiltFollower()
 		: m_ptsvc(0)
 		, m_txt(0)
-		, m_px(0.5)
-		, m_py(0.5)
+		, m_nci(0)
+		, m_ncj(0)
+		, m_npi(0)
+		, m_npj(0)
 	{
 	}
 	
@@ -100,39 +112,54 @@ struct PanTiltFollower : public FleyePlugin
 			return ;
 		}
 		
-		for( auto cycleName : root.getMemberNames() )
+		Json::Value layout = root["GridLayout"];
+		m_nci = layout["ControlGridX"].asInt();
+		m_ncj = layout["ControlGridY"].asInt();
+		m_npi = layout["ScreenGridX"].asInt();
+		m_npj = layout["ScreenGridY"].asInt();
+		std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj;
+		m_cgrid.resize( m_nci * m_ncj );
+		
+		Json::Value data = root["CalibrationData"];
+		for( const Json::Value& cycle : data )
 		{
-			std::cout<<"cycle '"<<cycleName<<"'\n";
-			Json::Value cycle = root[cycleName];
-			CalibrationSample csample;
-			for( auto trackName : cycle.getMemberNames() )
+			int i = cycle["Ci"].asInt();
+			int j = cycle["Cj"].asInt();
+			int k = j * m_nci + i;
+			m_cgrid[k].C.x = cycle["Cx"].asDouble();
+			m_cgrid[k].C.y = cycle["Cy"].asDouble();
+			std::cout<<"cycle : Ci="<<i<<", j="<<j<<", Cx="<<m_cgrid[k].C.x<<", Cy="<<m_cgrid[k].C.y<<"\n";
+			m_cgrid[k].sgrid.resize( m_npi*m_npj );
+			Json::Value trackList = cycle["Samples"];
+			for( const Json::Value& track : trackList )
 			{
-				std::cout<<"\ttrack '"<<trackName<<"'\n";
-				Json::Value track = cycle[trackName];
-				TrackingSample sample;
-				csample.Cx = track["Cx"].asDouble();
-				csample.Cy = track["Cy"].asDouble();
-				sample.Px = track["Px"].asDouble();
-				sample.Py = track["Py"].asDouble();
-				sample.dPxdCx = track["dPxdCx"].asDouble();
-				sample.dPydCx = track["dPydCx"].asDouble();
-				sample.dPxdCy = track["dPxdCy"].asDouble();
-				sample.dPydCy = track["dPydCy"].asDouble();
-				sample.normalize();
-				csample.m_track.push_back( sample );
+				int Pi = track["Pi"].asInt();
+				int Pj = track["Pj"].asInt();
+				std::cout<<"track "<<Pi<<","<<Pj<<"\n";
+				int Pk = Pj * m_npi + Pi;
+				m_cgrid[k].sgrid[Pk].P.x = track["Px"].asDouble();
+				m_cgrid[k].sgrid[Pk].P.y = track["Py"].asDouble();
+				m_cgrid[k].sgrid[Pk].dPdCx.x = track["dPxdCx"].asDouble();
+				m_cgrid[k].sgrid[Pk].dPdCx.y = track["dPydCx"].asDouble();
+				m_cgrid[k].sgrid[Pk].dPdCy.x = track["dPxdCy"].asDouble();
+				m_cgrid[k].sgrid[Pk].dPdCy.y = track["dPydCy"].asDouble();
+				m_cgrid[k].sgrid[Pk].normalize();
+				m_cgrid[k].sgrid[Pk].print();
 			}
-			m_samples.push_back(csample);
 		}
-
+		
+		// TODO: tracked object have drawing style and color attributes
 		auto cobj = TrackingService_instance()->getTrackedObject(66);
 		cobj->posX = 0.5;
 		cobj->posY = 0.5;
 
 		std::cout<<"PanTiltFollower ready : PanTiltService @"<<m_ptsvc<<", obj @"<<m_obj<< "\n";
+
 	}
 
 	void run(FleyeContext* ctx,int threadId)
 	{
+#if 0
 		const float targetX = 0.5;
 		const float targetY = 0.5;
 		
@@ -141,8 +168,6 @@ struct PanTiltFollower : public FleyePlugin
 		W=1.0f/W;
 		float px = m_obj->posX * W;
 		float py = m_obj->posY * W;
-		m_px = px;
-		m_py = py;
 
 		float dPx = targetX - px;
 		float dPy = targetY - py;
@@ -268,15 +293,14 @@ struct PanTiltFollower : public FleyePlugin
 			float dc = nCy>0 ? -0.002 : 0.002 ;
 			m_ptsvc->setTilt( m_ptsvc->tilt() + dc );
 		}*/
-
+#endif
 	}
 
 	PanTiltService* m_ptsvc;
 	PositionnedText* m_txt;
 	TrackedObject* m_obj;
-	float m_px, m_py;
-	std::vector<CalibrationSample> m_samples;
-	std::vector<TrackingSample> m_itrack;
+	std::vector<CalibrationSample> m_cgrid;
+	int m_nci, m_ncj, m_npi, m_npj;
 };
 
 FLEYE_REGISTER_PLUGIN(PanTiltFollower);

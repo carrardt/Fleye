@@ -1,245 +1,106 @@
 {
-"Cycle0" : {
-	"Tracking0" : {
-		"Cx" : 0.2 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -1.99091 , "dPydCx" : -10.2887
-		,"dPxdCy" : 7.48626 , "dPydCy" : 3.57885
+	"GridLayout" : { "ControlGridX":3, "ControlGridY":3, "ScreenGridX":2, "ScreenGridY":2 }
+	,
+	"CalibrationData":
+	[
+		 
+		{
+			"Ci":0, "Cj":0, "Cx":0.2, "Cy":0.2,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-3.96325, "dPydCx":-15.5353, "dPxdCy":7.09043, "dPydCy":4.34279 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":-3.73028, "dPydCx":-13.0117, "dPxdCy":4.30246, "dPydCy":-0.812786 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-2.31388, "dPydCx":-8.36745, "dPxdCy":8.851, "dPydCy":9.38405 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-2.37724, "dPydCx":-8.66626, "dPxdCy":7.64193, "dPydCy":2.96778 }
+			]
 		}
-	,"Tracking1" : {
-		"Cx" : 0.2 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -3.6975 , "dPydCx" : -12.3157
-		,"dPxdCy" : 5.01203 , "dPydCy" : 0.219788
+		,
+		{
+			"Ci":1, "Cj":0, "Cx":0.4, "Cy":0.2,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-0.648286, "dPydCx":-13.2786, "dPxdCy":6.76074, "dPydCy":9.09205 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":-0.395198, "dPydCx":-10.9081, "dPxdCy":6.39345, "dPydCy":2.57908 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-1.0395, "dPydCx":-6.84928, "dPxdCy":6.50527, "dPydCy":3.98478 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-1.56935, "dPydCx":-4.92667, "dPxdCy":6.87998, "dPydCy":1.42004 }
+			]
 		}
-	,"Tracking2" : {
-		"Cx" : 0.2 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -2.15354 , "dPydCx" : -7.04597
-		,"dPxdCy" : 10.3145 , "dPydCy" : 10.0665
+		,
+		{
+			"Ci":2, "Cj":0, "Cx":0.6, "Cy":0.2,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":1.1949, "dPydCx":-9.35375, "dPxdCy":6.2829, "dPydCy":1.27288 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":0.124434, "dPydCx":-6.13253, "dPxdCy":6.03982, "dPydCy":-0.303142 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-0.808363, "dPydCx":-5.23657, "dPxdCy":4.1501, "dPydCy":0.20878 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-1.6084, "dPydCx":-3.34068, "dPxdCy":3.98676, "dPydCy":-0.29467 }
+			]
 		}
-	,"Tracking3" : {
-		"Cx" : 0.2 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -2.82717 , "dPydCx" : -7.43955
-		,"dPxdCy" : 7.98518 , "dPydCy" : 4.17172
+		,
+		{
+			"Ci":0, "Cj":1, "Cx":0.2, "Cy":0.4,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-4.15737, "dPydCx":-13.9652, "dPxdCy":3.92905, "dPydCy":-1.22613 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":-0.280416, "dPydCx":-11.3427, "dPxdCy":5.9141, "dPydCy":-4.42263 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-1.7194, "dPydCx":-8.91941, "dPxdCy":7.18938, "dPydCy":2.86216 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-1.64783, "dPydCx":-10.9966, "dPxdCy":8.17482, "dPydCy":-2.49402 }
+			]
 		}
-	}
-
-,"Cycle1" : {
-	"Tracking0" : {
-		"Cx" : 0.2 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -4.50883 , "dPydCx" : -11.8483
-		,"dPxdCy" : 4.2287 , "dPydCy" : -0.136952
+		,
+		{
+			"Ci":1, "Cj":1, "Cx":0.4, "Cy":0.4,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-0.759806, "dPydCx":-12.0227, "dPxdCy":7.09258, "dPydCy":2.93831 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":-0.607591, "dPydCx":-11.714, "dPxdCy":8.14247, "dPydCy":-2.41236 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-1.20316, "dPydCx":-5.15224, "dPxdCy":7.63073, "dPydCy":1.51947 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-0.195244, "dPydCx":-7.19152, "dPxdCy":6.29642, "dPydCy":0.183689 }
+			]
 		}
-	,"Tracking1" : {
-		"Cx" : 0.2 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -0.931203 , "dPydCx" : -8.57332
-		,"dPxdCy" : 4.17729 , "dPydCy" : -3.09719
+		,
+		{
+			"Ci":2, "Cj":1, "Cx":0.6, "Cy":0.4,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":0.199372, "dPydCx":-5.80331, "dPxdCy":7.20346, "dPydCy":-0.454725 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":0.265085, "dPydCx":-6.8425, "dPxdCy":5.59634, "dPydCy":-0.717683 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-1.43721, "dPydCx":-3.33898, "dPxdCy":3.86895, "dPydCy":0.1441 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":0.280732, "dPydCx":-4.49247, "dPxdCy":4.6302, "dPydCy":-0.0813335 }
+			]
 		}
-	,"Tracking2" : {
-		"Cx" : 0.2 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -2.10922 , "dPydCx" : -6.97204
-		,"dPxdCy" : 7.11572 , "dPydCy" : 4.6834
+		,
+		{
+			"Ci":0, "Cj":2, "Cx":0.2, "Cy":0.6,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-0.860662, "dPydCx":-12.1893, "dPxdCy":6.15267, "dPydCy":-4.91964 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":4.8242, "dPydCx":-11.9604, "dPxdCy":6.60645, "dPydCy":-3.98545 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":-1.14246, "dPydCx":-11.0287, "dPxdCy":8.58779, "dPydCy":-2.43962 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":1.64932, "dPydCx":-11.0986, "dPxdCy":8.74579, "dPydCy":-1.29039 }
+			]
 		}
-	,"Tracking3" : {
-		"Cx" : 0.2 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -2.05549 , "dPydCx" : -8.94809
-		,"dPxdCy" : 7.06139 , "dPydCy" : -0.454624
+		,
+		{
+			"Ci":1, "Cj":2, "Cx":0.4, "Cy":0.6,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":-0.971015, "dPydCx":-11.9106, "dPxdCy":8.91635, "dPydCy":-2.75365 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":2.07493, "dPydCx":-11.3489, "dPxdCy":8.89177, "dPydCy":-1.41047 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":0.0641302, "dPydCx":-6.52731, "dPxdCy":7.17502, "dPydCy":0.350987 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":-0.10773, "dPydCx":-10.8171, "dPxdCy":6.32804, "dPydCy":-1.17277 }
+			]
 		}
-	}
-
-,"Cycle2" : {
-	"Tracking0" : {
-		"Cx" : 0.2 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -1.41226 , "dPydCx" : -9.12291
-		,"dPxdCy" : 4.37293 , "dPydCy" : -3.41373
+		,
+		{
+			"Ci":2, "Cj":2, "Cx":0.6, "Cy":0.6,
+			"Samples" :
+			[
+				 { "Pi":0, "Pj":0, "Px":0.25, "Py":0.25, "dPxdCx":0.213611, "dPydCx":-6.42682, "dPxdCy":7.18036, "dPydCy":-0.839512 }
+				,{ "Pi":1, "Pj":0, "Px":0.75, "Py":0.25, "dPxdCx":-0.186515, "dPydCx":-10.6196, "dPxdCy":5.93692, "dPydCy":-0.240709 }
+				,{ "Pi":0, "Pj":1, "Px":0.25, "Py":0.75, "dPxdCx":0.449554, "dPydCx":-4.24236, "dPxdCy":4.61834, "dPydCy":0.232295 }
+				,{ "Pi":1, "Pj":1, "Px":0.75, "Py":0.75, "dPxdCx":0.298615, "dPydCx":-7.67205, "dPxdCy":5.09567, "dPydCy":-0.674246 }
+			]
 		}
-	,"Tracking1" : {
-		"Cx" : 0.2 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : 1.67649 , "dPydCx" : -8.45363
-		,"dPxdCy" : 4.45711 , "dPydCy" : -3.19395
-		}
-	,"Tracking2" : {
-		"Cx" : 0.2 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -1.25235 , "dPydCx" : -9.20613
-		,"dPxdCy" : 7.51545 , "dPydCy" : -0.0623088
-		}
-	,"Tracking3" : {
-		"Cx" : 0.2 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -0.589612 , "dPydCx" : -8.64488
-		,"dPxdCy" : 8.50986 , "dPydCy" : -1.81219
-		}
-	}
-
-,"Cycle3" : {
-	"Tracking0" : {
-		"Cx" : 0.4 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -0.228401 , "dPydCx" : -10.4954
-		,"dPxdCy" : 7.38004 , "dPydCy" : 7.88156
-		}
-	,"Tracking1" : {
-		"Cx" : 0.4 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -0.654005 , "dPydCx" : -10.1862
-		,"dPxdCy" : 5.68629 , "dPydCy" : 3.85931
-		}
-	,"Tracking2" : {
-		"Cx" : 0.4 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -1.07012 , "dPydCx" : -6.43936
-		,"dPxdCy" : 6.05404 , "dPydCy" : 4.0666
-		}
-	,"Tracking3" : {
-		"Cx" : 0.4 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -1.12652 , "dPydCx" : -4.17868
-		,"dPxdCy" : 6.4344 , "dPydCy" : 4.28045
-		}
-	}
-
-,"Cycle4" : {
-	"Tracking0" : {
-		"Cx" : 0.4 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -0.806949 , "dPydCx" : -9.92259
-		,"dPxdCy" : 7.00417 , "dPydCy" : 4.81315
-		}
-	,"Tracking1" : {
-		"Cx" : 0.4 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -0.69137 , "dPydCx" : -10.3138
-		,"dPxdCy" : 7.78102 , "dPydCy" : 0.66527
-		}
-	,"Tracking2" : {
-		"Cx" : 0.4 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -0.730991 , "dPydCx" : -3.70794
-		,"dPxdCy" : 6.53903 , "dPydCy" : 4.45045
-		}
-	,"Tracking3" : {
-		"Cx" : 0.4 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -0.358339 , "dPydCx" : -4.51233
-		,"dPxdCy" : 6.7417 , "dPydCy" : 2.10811
-		}
-	}
-
-,"Cycle5" : {
-	"Tracking0" : {
-		"Cx" : 0.4 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : -0.907241 , "dPydCx" : -9.75497
-		,"dPxdCy" : 8.75487 , "dPydCy" : 1.06065
-		}
-	,"Tracking1" : {
-		"Cx" : 0.4 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -0.402659 , "dPydCx" : -8.79045
-		,"dPxdCy" : 8.72293 , "dPydCy" : -1.35154
-		}
-	,"Tracking2" : {
-		"Cx" : 0.4 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : 0.00204312 , "dPydCx" : -4.23849
-		,"dPxdCy" : 7.06432 , "dPydCy" : 2.60449
-		}
-	,"Tracking3" : {
-		"Cx" : 0.4 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -0.170021 , "dPydCx" : -8.19537
-		,"dPxdCy" : 4.15772 , "dPydCy" : -0.648849
-		}
-	}
-
-,"Cycle6" : {
-	"Tracking0" : {
-		"Cx" : 0.6 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : 1.27818 , "dPydCx" : -8.55239
-		,"dPxdCy" : 4.93791 , "dPydCy" : 0.807117
-		}
-	,"Tracking1" : {
-		"Cx" : 0.6 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : 0.330582 , "dPydCx" : -5.41532
-		,"dPxdCy" : 4.90002 , "dPydCy" : 2.43719
-		}
-	,"Tracking2" : {
-		"Cx" : 0.6 , "Cy" : 0.2
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -0.928566 , "dPydCx" : -4.99334
-		,"dPxdCy" : 2.35143 , "dPydCy" : 0.145049
-		}
-	,"Tracking3" : {
-		"Cx" : 0.6 , "Cy" : 0.2
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -0.586895 , "dPydCx" : -2.77797
-		,"dPxdCy" : 1.88501 , "dPydCy" : -0.256067
-		}
-	}
-
-,"Cycle7" : {
-	"Tracking0" : {
-		"Cx" : 0.6 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : 0.330524 , "dPydCx" : -5.17263
-		,"dPxdCy" : 5.43177 , "dPydCy" : 2.37256
-		}
-	,"Tracking1" : {
-		"Cx" : 0.6 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : 0.416165 , "dPydCx" : -5.66366
-		,"dPxdCy" : 5.23633 , "dPydCy" : 1.26387
-		}
-	,"Tracking2" : {
-		"Cx" : 0.6 , "Cy" : 0.4
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -0.448105 , "dPydCx" : -2.60562
-		,"dPxdCy" : 1.46137 , "dPydCy" : 0.246749
-		}
-	,"Tracking3" : {
-		"Cx" : 0.6 , "Cy" : 0.4
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : -0.184919 , "dPydCx" : -3.49127
-		,"dPxdCy" : 2.71697 , "dPydCy" : -0.00324484
-		}
-	}
-
-,"Cycle8" : {
-	"Tracking0" : {
-		"Cx" : 0.6 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.25
-		,"dPxdCx" : 0.404161 , "dPydCx" : -4.87076
-		,"dPxdCy" : 6.08753 , "dPydCy" : 1.36257
-		}
-	,"Tracking1" : {
-		"Cx" : 0.6 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.25
-		,"dPxdCx" : -0.114603 , "dPydCx" : -8.58214
-		,"dPxdCy" : 3.11163 , "dPydCy" : -0.493836
-		}
-	,"Tracking2" : {
-		"Cx" : 0.6 , "Cy" : 0.6
-		,"Px" : 0.25 , "Py" : 0.75
-		,"dPxdCx" : -0.0759718 , "dPydCx" : -3.12953
-		,"dPxdCy" : 2.8461 , "dPydCy" : 0.349886
-		}
-	,"Tracking3" : {
-		"Cx" : 0.6 , "Cy" : 0.6
-		,"Px" : 0.75 , "Py" : 0.75
-		,"dPxdCx" : 0.299959 , "dPydCx" : -6.82548
-		,"dPxdCy" : 2.49744 , "dPydCy" : -0.376043
-		}
-	}
+	]
 }
-

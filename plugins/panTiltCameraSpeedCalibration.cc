@@ -36,7 +36,7 @@ struct panTiltCameraSpeedCalibration : public FleyePlugin
 			if(m_iteration==0)
 			{
 				std::ostringstream oss;
-				oss <<"Cycle "<<cycle<<" / "<<SpeedTestCycles;
+				oss <<"Cycle "<<(cycle+1)<<" / "<<SpeedTestCycles;
 				m_txt->setText( oss.str() );
 			}
 			else
@@ -70,7 +70,7 @@ struct panTiltCameraSpeedCalibration : public FleyePlugin
 			std::cout<<"optimal motor speed per frame = "<<bestSpeedPerFrame<<"\n";
 			{
 				std::ostringstream oss;
-				oss <<"{ \"PanTiltSpeed\" : " << bestSpeedPerFrame <<"}\n";
+				oss <<"{ \"PanTiltSpeed\" : " << bestSpeedPerFrame <<" }\n";
 				std::ofstream file("/tmp/calibration.txt");
 				file << oss.str(); file.flush(); file.close();
 				m_txt->setText( oss.str() );

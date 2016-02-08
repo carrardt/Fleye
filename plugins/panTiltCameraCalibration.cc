@@ -25,7 +25,7 @@ struct panTiltCameraCalibration : public FleyePlugin
 		, m_cycle(0)
 		, m_iteration(0)
 	{
-		m_logFile.open("/tmp/calibration.json");
+		
 	}
 	
 	void setup(FleyeContext* ctx)
@@ -33,6 +33,12 @@ struct panTiltCameraCalibration : public FleyePlugin
 		m_ptsvc = PanTiltService_instance();
 		m_tracksvc = TrackingService_instance();
 		m_txt = TextService_instance()->addPositionnedText(0.2,0.2);
+		m_logFile.open("/tmp/calibration.json");
+		m_logFile << "{\n\t\"GridLayout\" : { ";
+		m_logFile << "\"ControlGridX\":" << PositionSteps << ", ";
+		m_logFile << "\"ControlGridY\":" << PositionSteps << ", ";
+		m_logFile << "\"ScreenGridX\":" << 2 << ", ";
+		m_logFile << "\"ScreenGridY\":" << 2 << " }\n\t,\n\t\"CalibrationData\":\n\t[\n";
 		std::cout<<"panTiltCameraCalibration ready : PanTiltService @"<<m_ptsvc<<", TrackingService @"<<m_tracksvc<< "\n";
 	}
 
@@ -41,12 +47,21 @@ struct panTiltCameraCalibration : public FleyePlugin
 		int posCycle = m_cycle / 2;
 		int dirCycle = m_cycle % 2;
 		
-		if( posCycle >= CycleCount ) { m_logFile.close(); return; }
+		if( posCycle == CycleCount )
+		{
+			m_logFile << "\t]\n}\n";
+			m_logFile.close();
+			std::cout<<"Calibration done\n";
+			m_cycle += 2;
+		};
+		if( posCycle > CycleCount ) { return; }
 
-		int iposY = PositionMargin + (posCycle/PositionSteps) - 1;
-		int iposX = PositionMargin + (posCycle%PositionSteps) - 1;
-		double startX = iposY * DivisionSize;
-		double startY = iposX * DivisionSize;
+		int posI = posCycle%PositionSteps;
+		int posJ = posCycle/PositionSteps;
+		int iposX = PositionMargin + posI - 1;
+		int iposY = PositionMargin + posJ - 1;
+		double startX = iposX * DivisionSize;
+		double startY = iposY * DivisionSize;
 		double dirX = dirCycle ? 0.0 : 2*DivisionSize;
 		double dirY = dirCycle ? 2*DivisionSize : 0.0;
 		double pathLength = sqrt(dirX*dirX+dirY*dirY);
@@ -87,18 +102,19 @@ struct panTiltCameraCalibration : public FleyePlugin
 			if( dirCycle )
 			{
 				std::ostringstream oss;
-				oss<<"\"Cycle"<<posCycle<<"\" : {\n";
+				oss<<"\t\t"<< ((posCycle==0)?" ":",") <<"\n\t\t{\n";
+				oss<<"\t\t\t\"Ci\":"<<posI<<", \"Cj\":"<<posJ<<", \"Cx\":"<<startX+DivisionSize<<", \"Cy\":"<<startY+DivisionSize<<",\n";
+				oss<<"\t\t\t\"Samples\" :\n\t\t\t[\n";
 				for(int i=0;i<4;i++)
 				{
-					oss<<"\t\"Tracking"<<i<<"\" : {\n";
+					oss<<"\t\t\t\t"<<  ((i==0)?" ":",") <<"{ ";
+					oss<<"\"Pi\":"<<i%2<<", \"Pj\":"<<i/2;
 					TrackedObject* obj = m_tracksvc->getTrackedObject(i);
-					oss<<"\t\t\"Cx\" : "<<startX+DivisionSize<<" , \"Cy\" : "<<startY+DivisionSize<<"\n";
-					oss<<"\t\t\"Px\" : "<<obj->posX<<" , \"Py\" : "<<obj->posY<<"\n";
-					double l = sqrt( m_dPxdCx[i]*m_dPxdCx[i] + m_dPydCx[i]*m_dPydCx[i] );
-					oss<<"\t\t\"dPxdCx\" : "<<m_dPxdCx[i]<<" , \"dPydCx\" : "<<m_dPydCx[i]<<"\n";
-					oss<<"\t\t\"dPxdCy\" : "<<m_dPxdCy[i]<<" , \"dPydCy\" : "<<m_dPydCy[i]<<"\n\t\t}\n";
+					oss<<", \"Px\":"<<obj->posX<<", \"Py\":"<<obj->posY;
+					oss<<", \"dPxdCx\":"<<m_dPxdCx[i]<<", \"dPydCx\":"<<m_dPydCx[i];
+					oss<<", \"dPxdCy\":"<<m_dPxdCy[i]<<", \"dPydCy\":"<<m_dPydCy[i]<<" }\n";
 				}
-				oss<<"\t}\n\n";
+				oss<<"\t\t\t]\n\t\t}\n";
 				std::cout << oss.str();
 				m_logFile << oss.str();
 				m_logFile.flush();
