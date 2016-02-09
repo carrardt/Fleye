@@ -37,11 +37,6 @@ struct PanTiltFollower : public FleyePlugin
 	};
 	
 	static inline float dot(Vec2f u, Vec2f v) { return u.x * v.x + u.y * v.y; }
-
-	static inline Vec2f weightedSum( Vec2f x1, Vec2f x2, Vec2f x3, float w1, float w2, float w3 )
-	{
-		return x1*w1 + x2*w2 + x3*w3;
-	}
 	
 	struct ScreenSample
 	{
@@ -61,28 +56,30 @@ struct PanTiltFollower : public FleyePlugin
 		}
 	};
 
-	static inline ScreenSample weightedSum( ScreenSample s1, ScreenSample s2, ScreenSample s3, float w1, float w2, float w3 )
+	static inline ScreenSample interpolate(const ScreenSample& s1, const ScreenSample& s2, float t)
 	{
 		ScreenSample r;
-		r.P = weightedSum( s1.P, s2.P, s3.P, w1, w2, w3 );
-		r.dPdCx = weightedSum( s1.dPdCx, s2.dPdCx, s3.dPdCx, w1, w2, w3 );
-		r.dPdCy = weightedSum( s1.dPdCy, s2.dPdCy, s3.dPdCy, w1, w2, w3 );
+		r.P = s1.P*(1.0f-t) + s2.P*t;
+		r.dPdCx = s1.dPdCx*(1.0f-t) + s2.dPdCx*t;
+		r.dPdCy = s1.dPdCy*(1.0f-t) + s2.dPdCy*t;
 		return r;
 	}
 
 	struct CalibrationSample
 	{
-		Vec2f C;		
+		Vec2f C;
 		std::vector<ScreenSample> sgrid;
 	};
 
-	static inline float lineDist(Vec2f m1, Vec2f m2, Vec2f p)
+	static inline CalibrationSample interpolate(const CalibrationSample& c1, const CalibrationSample& c2, float t)
 	{
-		Vec2f N( m1.y - m2.y , m2.x - m1.x );
-		// with this commented out, it becomes an oriented area, which is what we want for barycentric coordinates
-		//N = N.normalize();
-		float c = - dot(N,m1); 
-		return dot(N,p) + c;
+		int n = c1.sgrid.size();
+		assert( n == c2.sgrid.size() );
+		CalibrationSample r;
+		r.sgrid.resize( n );
+		r.C = c1.C*(1.0f-t) + c2.C*t;
+		for(int i=0;i<n;i++) r.sgrid[i] = interpolate(c1.sgrid[i],c2.sgrid[i],t);
+		return r;
 	}
 
 	inline PanTiltFollower()
@@ -93,6 +90,16 @@ struct PanTiltFollower : public FleyePlugin
 		, m_npi(0)
 		, m_npj(0)
 	{
+	}
+	
+	inline CalibrationSample& cgrid(int i,int j)
+	{ 
+		return m_cgrid[j*m_nci+i]; 
+	}
+	
+	inline ScreenSample& sgrid( CalibrationSample& c, int i, int j )
+	{
+		return c.sgrid[j*m_npi+i];
 	}
 	
 	void setup(FleyeContext* ctx)
@@ -159,9 +166,7 @@ struct PanTiltFollower : public FleyePlugin
 
 	void run(FleyeContext* ctx,int threadId)
 	{
-#if 0
-		const float targetX = 0.5;
-		const float targetY = 0.5;
+		const Vec2f target( 0.5f, 0.5f );
 		
 		float W = m_obj->weight;
 		if( W < 1.e-9f ) return;
@@ -169,131 +174,57 @@ struct PanTiltFollower : public FleyePlugin
 		float px = m_obj->posX * W;
 		float py = m_obj->posY * W;
 
-		float dPx = targetX - px;
-		float dPy = targetY - py;
-		float targetDist2 = dPx*dPx+dPy*dPy;
-		if( targetDist2 < 0.001 ) return;
+		Vec2f dP = target - Vec2f(px,py);
+		if( dP.norm2() < 0.001 ) return;
 		
 		float cx = m_ptsvc->pan();
 		float cy = m_ptsvc->tilt();
 
-		std::sort( m_samples.begin(), m_samples.end() ,
-			[cx,cy] (CalibrationSample s1, CalibrationSample s2) -> bool { return s1.dist2(cx,cy) < s2.dist2(cx,cy); }
-			);
+		int ci=0, cj=0;
+		while( ci<(m_nci-1) && cgrid(ci,cj).C.x > cx ) ++ci;
+		while( cj<(m_ncj-1) && cgrid(ci,cj).C.y > cy ) ++cj;
+		
+		... // ni-1 / nj-1 a verifier, pense qu'il faut reculrer d'un cran
+		
+		// ensure this is an orthogonal grid
+		assert( cgrid(ci,cj).C.y == cgrid(ci+1,cj).C.y );
+		assert( cgrid(ci,cj+1).C.y == cgrid(ci+1,cj+1).C.y );
+		assert( cgrid(ci,cj).C.x == cgrid(ci,cj+1).C.x );
+		assert( cgrid(ci+1,cj).C.x == cgrid(ci+1,cj+1).C.x );
+		
+		float tcx = ( cx - cgrid(ci,cj).C.x ) / ( cgrid(ci+1,cj).C.x - cgrid(ci,cj).C.x ) ;
+		float tcy = ( cy - cgrid(ci,cj).C.y ) / ( cgrid(ci,cj+1).C.y - cgrid(ci,cj).C.y ) ;
+		
+		CalibrationSample c1 = interpolate( cgrid(ci,cj) , cgrid(ci+1,cj) , tcx );
+		CalibrationSample c2 = interpolate( cgrid(ci,cj+1) , cgrid(ci+1,cj+1) , tcx );
+		CalibrationSample c = interpolate( c1, c2, tcy );
+		
+		int pi=0,pj=0;
+		while( pi<(m_npi-1) && sgrid(c,pi,pj).P.x > px ) ++pi;
+		while( pj<(m_npj-1) && sgrid(c,pi,pj).P.y > py ) ++pj;
+		
+		... // ni-1 / nj-1 a verifier, pense qu'il faut reculrer d'un cran
+		
+		// ensure this is an orthogonal grid
+		assert( sgrid(c,pi,pj).P.y == sgrid(c,pi+1,pj).P.y );
+		assert( sgrid(c,pi,pj+1).P.y == sgrid(c,pi+1,pj+1).P.y );
+		assert( sgrid(c,pi,pj).P.x == sgrid(c,pi,pj+1).P.x );
+		assert( sgrid(c,pi+1,pj).P.x == sgrid(c,pi+1,pj+1).P.x );
 
-		CalibrationSample s1 = m_samples[0];
-		CalibrationSample s2 = m_samples[1];
-		CalibrationSample s3 = m_samples[2];
-		
-		// ensure s1,s2 and s3 are ccw
-		{
-			float v1x = s2.Cx - s1.Cx;
-			float v1y = s2.Cy - s1.Cy;
-			float v2x = s3.Cx - s1.Cx;
-			float v2y = s3.Cy - s1.Cy;
-			if( (v1x*v2x+v1y*v2y) < 0.0f ) { std::swap(s2,s3); }
-		}
-		
-		// compute barycentric coordinate
-		float D1 = lineDist( s2.Cx, s2.Cy, s3.Cx, s3.Cy, s1.Cx, s1.Cy );
-		float d1 = lineDist( s2.Cx, s2.Cy, s3.Cx, s3.Cy, cx, cy ) / D1;
-		
-		float D2 = lineDist( s3.Cx, s3.Cy, s1.Cx, s1.Cy, s2.Cx, s2.Cy );
-		float d2 = lineDist( s3.Cx, s3.Cy, s1.Cx, s1.Cy, cx, cy ) / D2;
+		float tpx = ( px - sgrid(c,pi,pj).P.x ) / ( sgrid(c,pi+1,pj).P.x - sgrid(c,pi,pj).P.x );
+		float tpy = ( py - sgrid(c,pi,pj).P.y ) / ( sgrid(c,pi,pj+1).P.y - sgrid(c,pi,pj).P.y );
 
-		float D3 = lineDist( s1.Cx, s1.Cy, s2.Cx, s2.Cy, s3.Cx, s3.Cy );
-		float d3 = lineDist( s1.Cx, s1.Cy, s2.Cx, s2.Cy, cx, cy ) / D3;
+		ScreenSample s1 = interpolate( sgrid(c,pi,pj) , sgrid(c,pi+1,pj) , tpx );
+		ScreenSample s2 = interpolate( sgrid(c,pi,pj+1) , sgrid(c,pi+1,pj+1) , tpx );
+		ScreenSample s = interpolate( s1 , s2 , tpy );
 		
-		if( d1<0.0 || d2<0.0 || d3<0.0 )
-		{
-			std::cout<<"out of control space\n";
-			return;
-		}
+		float nCx = dot( s.dPdCx , dP );
+		float nCy = dot( s.dPdCy , dP );
 		
-		float Fx = cx - ( d1*s1.Cx + d2*s2.Cx + d3*s3.Cx ) ;
-		float Fy = cy - ( d1*s1.Cy + d2*s2.Cy + d3*s3.Cy ) ;
-		if( (Fx*Fx+Fy*Fy) > 1.e-9  )
-		{
-			std::cout<<"Barycentric error\n";
-			return;
-		}
-		
-		// now, screen space interpolation
-		int nTrack = s1.m_track.size();
-		assert( nTrack == s2.m_track.size() );
-		assert( nTrack == s3.m_track.size() );
-		m_itrack.resize( nTrack );
-		for(int i=0;i<nTrack;i++)
-		{
-			assert( s1.m_track[i].Px == s2.m_track[i].Px );
-			assert( s1.m_track[i].Py == s2.m_track[i].Py );
-			assert( s1.m_track[i].Px == s3.m_track[i].Px );
-			assert( s1.m_track[i].Py == s3.m_track[i].Py );
-			m_itrack[i] = TrackingSample::interpolate(s1.m_track[i],s2.m_track[i],s3.m_track[i],d1,d2,d3);
-		}
-		
-		std::sort( m_itrack.begin(), m_itrack.end() ,
-			[px,py] (TrackingSample s1, TrackingSample s2) -> bool { return s1.dist2(px,py) < s2.dist2(px,py); }
-			);
-		
-		TrackingSample ts1 = m_itrack[0];
-		TrackingSample ts2 = m_itrack[1];
-		TrackingSample ts3 = m_itrack[2];
-
-		// ensure ts1, ts2 and ts3 are ccw
-		{
-			float v1x = ts2.Px - ts1.Px;
-			float v1y = ts2.Py - ts1.Py;
-			float v2x = ts3.Px - ts1.Px;
-			float v2y = ts3.Py - ts1.Py;
-			
-			if( (v1x*v2x+v1y*v2y) < 0.0f ) { std::swap(ts2,ts3); }
-		}
-		
-		float tD1 = lineDist( ts2.Px, ts2.Py, ts3.Px, ts3.Py, ts1.Px, ts1.Py );
-		float td1 = lineDist( ts2.Px, ts2.Py, ts3.Px, ts3.Py, px, py ) / tD1;
-		float tD2 = lineDist( ts3.Px, ts3.Py, ts1.Px, ts1.Py, ts2.Px, ts2.Py );
-		float td2 = lineDist( ts3.Px, ts3.Py, ts1.Px, ts1.Py, px, py ) / tD2;
-		float tD3 = lineDist( ts1.Px, ts1.Py, ts2.Px, ts2.Py, ts3.Px, ts3.Py );
-		float td3 = lineDist( ts1.Px, ts1.Py, ts2.Px, ts2.Py, px, py ) / tD3;
-
-		if( td1<0.0 || td2<0.0 || td3<0.0 )
-		{
-			std::cout<<"out of screen space\n";
-			return;
-		}
-
-		Fx = px - ( td1*ts1.Px + td2*ts2.Px + td3*ts3.Px ) ;
-		Fy = py - ( td1*ts1.Py + td2*ts2.Py + td3*ts3.Py ) ;
-		if( (Fx*Fx+Fy*Fy) > 1.e-9  )
-		{
-			std::cout<<"Barycentric error\n";
-			return;
-		}
-		
-
-		TrackingSample F = TrackingSample::interpolate(ts1,ts2,ts3,td1,td2,td3);
-		
-		float nCx = F.dPxdCx * dPx + F.dPydCx * dPy ;
-		float nCy = F.dPxdCy * dPx + F.dPydCy * dPy ;
-		
-		m_txt->out() <<"dPxdCx="<<F.dPxdCx<<"\ndPydCx="<<F.dPydCx
-					<<"\ndPxdCy="<<F.dPxdCy<<"\ndPydCy="<<F.dPydCy
-					<<"\nnCx="<<nCx<<"\nnCy="<<nCy;
+		m_txt->out() <<"nCx="<<nCx<<"\nnCy="<<nCy;
 
 		m_ptsvc->setPan( m_ptsvc->pan() -nCx*0.04 );
 		m_ptsvc->setTilt( m_ptsvc->tilt() -nCy*0.04 );
-		/*if( fabsf(nCx) > fabsf(nCy) )
-		{			
-			float dc = nCx>0 ? -0.002 : 0.002 ;
-			m_ptsvc->setPan( m_ptsvc->pan() + dc );
-		}
-		else
-		{
-			float dc = nCy>0 ? -0.002 : 0.002 ;
-			m_ptsvc->setTilt( m_ptsvc->tilt() + dc );
-		}*/
-#endif
 	}
 
 	PanTiltService* m_ptsvc;
