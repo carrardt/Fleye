@@ -181,10 +181,8 @@ struct PanTiltFollower : public FleyePlugin
 		float cy = m_ptsvc->tilt();
 
 		int ci=0, cj=0;
-		while( ci<(m_nci-1) && cgrid(ci,cj).C.x > cx ) ++ci;
-		while( cj<(m_ncj-1) && cgrid(ci,cj).C.y > cy ) ++cj;
-		
-		... // ni-1 / nj-1 a verifier, pense qu'il faut reculrer d'un cran
+		while( ci<(m_nci-2) && cgrid(ci,cj).C.x > cx ) ++ci;
+		while( cj<(m_ncj-2) && cgrid(ci,cj).C.y > cy ) ++cj;
 		
 		// ensure this is an orthogonal grid
 		assert( cgrid(ci,cj).C.y == cgrid(ci+1,cj).C.y );
@@ -200,10 +198,8 @@ struct PanTiltFollower : public FleyePlugin
 		CalibrationSample c = interpolate( c1, c2, tcy );
 		
 		int pi=0,pj=0;
-		while( pi<(m_npi-1) && sgrid(c,pi,pj).P.x > px ) ++pi;
-		while( pj<(m_npj-1) && sgrid(c,pi,pj).P.y > py ) ++pj;
-		
-		... // ni-1 / nj-1 a verifier, pense qu'il faut reculrer d'un cran
+		while( pi<(m_npi-2) && sgrid(c,pi,pj).P.x > px ) ++pi;
+		while( pj<(m_npj-2) && sgrid(c,pi,pj).P.y > py ) ++pj;
 		
 		// ensure this is an orthogonal grid
 		assert( sgrid(c,pi,pj).P.y == sgrid(c,pi+1,pj).P.y );
