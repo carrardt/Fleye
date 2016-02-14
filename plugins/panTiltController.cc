@@ -7,10 +7,10 @@
 #include <iostream>
 
 #define SERVO_X_VALUE_MIN 256
-#define SERVO_X_VALUE_MAX 768
+#define SERVO_X_VALUE_MAX 768 //1023
 
 #define SERVO_Y_VALUE_MIN 256
-#define SERVO_Y_VALUE_MAX 768
+#define SERVO_Y_VALUE_MAX 768 //1023
 
 #define GPIO_AXIS_BITS 	10
 #define GPIO_LASER_BIT 	(2*GPIO_AXIS_BITS)
@@ -39,7 +39,7 @@ struct panTiltController : public FleyePlugin
 		 if( m_ptsvc->tilt() < 0.0 ) m_ptsvc->setTilt(0.0);
 		 else if( m_ptsvc->tilt() > 1.0 ) m_ptsvc->setTilt(1.0);
 		 
-		 gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), 0);
+		 gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), m_ptsvc->laser() );
 	}
 	
 	void gpio_write_xy_i(unsigned int xi, unsigned int yi, bool laser)

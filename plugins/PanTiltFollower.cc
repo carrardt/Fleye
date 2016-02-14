@@ -171,29 +171,34 @@ struct PanTiltFollower : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{
 		// what is the target position of the tracked point
-		const Vec2f target( 0.5f, 0.5f );
-		
+		const Vec2f target( 0.5f, 0.37f );
+
 		float W1 = m_obj1->weight;
-		float W2 = m_obj2->weight;
-		if( W1<1.0f || W2<1.0f) return;
+		//float W2 = m_obj2->weight;
+		if( W1<1.0f /*|| W2<1.0f*/) return;
 		W1=1.0f/W1;
-		W2=1.0f/W2;
+		//W2=1.0f/W2;
 		Vec2f P1( m_obj1->posX * W1 , m_obj1->posY * W1 );
-		Vec2f P2( m_obj2->posX * W2 , m_obj2->posY * W2 );
+		//Vec2f P2( m_obj2->posX * W2 , m_obj2->posY * W2 );
 
 		// this will be the position to track
-		Vec2f P = (P1+P2)*0.5f;
+		Vec2f P = P1; //(P1+P2)*0.5f;
 
 		Vec2f dP = target - P;
-		if( dP.norm2() < 0.001 ) return;
-		
+		if( dP.norm2() < 0.0004 )
+		{
+			m_ptsvc->setLaser( ! m_ptsvc->laser() );
+			return;
+		}
+		m_ptsvc->setLaser( false );
+
 		float cx = m_ptsvc->pan();
 		float cy = m_ptsvc->tilt();
 
 		int ci=0, cj=0;
 		while( ci<(m_nci-2) && cgrid(ci,cj).C.x > cx ) ++ci;
 		while( cj<(m_ncj-2) && cgrid(ci,cj).C.y > cy ) ++cj;
-		
+
 		// ensure this is an orthogonal grid
 		assert( cgrid(ci,cj).C.y == cgrid(ci+1,cj).C.y );
 		assert( cgrid(ci,cj+1).C.y == cgrid(ci+1,cj+1).C.y );
@@ -227,13 +232,17 @@ struct PanTiltFollower : public FleyePlugin
 		float nCx = dot( s.dPdCx , dP );
 		float nCy = dot( s.dPdCy , dP );
 		
+		// this allows to have slow & constant speed camera motion
+		//nCx = nCx > 0.0f ? 0.1f : -0.1f;
+		//nCy = nCy > 0.0f ? 0.1f : -0.1f;
+		
 		m_txt->out() <<"nCx="<<nCx
 					<<"\nnCy="<<nCy
 					<<"\nnCi="<<ci
 					<<"\nnCj="<<cj;
 
-		m_ptsvc->setPan( m_ptsvc->pan() -nCx*0.04 );
-		m_ptsvc->setTilt( m_ptsvc->tilt() -nCy*0.04 );
+		m_ptsvc->setPan( m_ptsvc->pan() -nCx*0.05 );
+		m_ptsvc->setTilt( m_ptsvc->tilt() -nCy*0.05 );
 	}
 
 	PanTiltService* m_ptsvc;
