@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <assert.h>
 
 struct panTiltCameraCalibration : public FleyePlugin
 {
@@ -27,8 +28,12 @@ struct panTiltCameraCalibration : public FleyePlugin
 		, m_txt(0)
 		, m_cycle(0)
 		, m_iteration(0)
-		, m_calibrationMode(0)
-		, m_controlSpeed(0.005)
+		, m_calibrationMode(1)
+		, m_controlSpeed(0.004)
+		, m_panMin(0.2)
+		, m_panMax(0.8)
+		, m_tiltMin(0.2)
+		, m_tiltMax(0.8)
 	{
 	}
 	
@@ -43,6 +48,7 @@ struct panTiltCameraCalibration : public FleyePlugin
 		m_logFile << "\"ControlGridY\":" << PositionSteps << ", ";
 		m_logFile << "\"ScreenGridX\":" << 2 << ", ";
 		m_logFile << "\"ScreenGridY\":" << 2 << " }\n";
+		m_logFile.flush();
 		std::cout<<"panTiltCameraCalibration ready : PanTiltService @"<<m_ptsvc<<", TrackingService @"<<m_tracksvc<< "\n";
 	}
 
@@ -81,11 +87,9 @@ struct panTiltCameraCalibration : public FleyePlugin
 				double bestSpeedPerFrame = 0.5*M_PI / (SpeedTestStart+bestI*SpeedTestStep);
 				std::cout<<"optimal motor control speed per frame = "<<bestSpeedPerFrame<<"\n";
 				{
-					std::ostringstream oss;
 					m_logFile <<"\t,\"MotionMotorSpeed\" : " << bestSpeedPerFrame <<"\n";
-					std::ofstream file("/tmp/calibration.txt");
-					file << oss.str(); file.flush(); file.close();
-					m_txt->setText( oss.str() );
+					m_logFile.flush();
+					m_txt->out() << "Speed = "<< bestSpeedPerFrame;
 				}
 				m_controlSpeed = bestSpeedPerFrame;
 				++ m_calibrationMode;
@@ -97,10 +101,13 @@ struct panTiltCameraCalibration : public FleyePlugin
 		{
 			float StartX = 0.5f;
 			float StartY = 0.5f;
-			bool axis = m_cycle/2;
-			bool dir = m_cycle%2;
+			bool axis = ( (m_cycle/2) == 0 );
+			bool dir = ( (m_cycle%2) == 0 );
 			int nbIteration = static_cast<int>( 0.5 / m_controlSpeed );
 			int totalIteration = 30 + nbIteration;
+
+			if( m_iteration == 0 ) { m_speedRecord.clear(); m_speedRecord.resize(nbIteration,-1.0);	}
+			
 			if( m_iteration<30 )
 			{
 				m_ptsvc->setPan( StartX );
@@ -108,24 +115,83 @@ struct panTiltCameraCalibration : public FleyePlugin
 			}
 			else if( m_iteration < totalIteration )
 			{
-				
-				m_ptsvc->setPan( StartX );
-				m_ptsvc->setTilt( StartY );
+				int step = m_iteration-30;
+				float t = (step*0.5f)/(float)nbIteration;
+				float d = dir ? t : -t;
+				float posx=0.5f, posy=0.5f;
+				if(axis) posy += d;
+				else posx += d;
+				m_ptsvc->setPan( posx );
+				m_ptsvc->setTilt( posy );
+				double Sx=0.0,Sy=0.0;
+				for(int i=0;i<4;i++)
+				{
+					TrackedObject* obj = m_tracksvc->getTrackedObject(i);
+					Sx += obj->speedX;
+					Sy += obj->speedY;
+				}
+				assert( step < m_speedRecord.size() );
+				m_speedRecord[step]=sqrt(Sx*Sx+Sy*Sy);
 			}
 			
 			if(m_iteration >= totalIteration )
 			{
+				double minVal = 1.e18;
+				double maxVal = 0.0;
+				double avg=0.0;
+				int N=m_speedRecord.size();
+				int i=0;
+				for(i=0;i<N;i++ )
+				{
+					double s = m_speedRecord[i];
+					if( s >= 0.0 )
+					{
+						//std::cout<<i<<":"<<s<<" ";
+						avg += s;
+						if( s < minVal ) minVal = s;
+						if( s > maxVal ) maxVal = s;
+					}
+				}
+				//std::cout<<"\n";
+				avg /= N;
+				//std::cout<<"avg="<<avg;
+				avg = (avg+minVal)*0.5;
+				//std::cout<<", seuil="<<avg;
+				i = N-1;
+				int o=0;
+				while( i>0 && o<2 )
+				{
+					if( m_speedRecord[i]>avg ) ++o;
+					 --i;
+				}
+				//std::cout<<"limit: i="<<i<<", s="<<m_speedRecord[i]<<"\n";
+				if( axis )
+				{
+					if( dir ) m_tiltMax = 0.5 + i*0.5/(double)N;
+					else m_tiltMin = 0.5 - i*0.5/(double)N;
+				}
+				else
+				{
+					if( dir ) m_panMax = 0.5 + i*0.5/(double)N;
+					else m_panMin = 0.5 - i*0.5/(double)N;
+				}
+				
 				m_iteration=0;
 				++ m_cycle;
 			}
 			else { ++m_iteration; }
 			
-			if( m_cycle >= 2 )
+			if( m_cycle >= 4 )
 			{
-				m_logFile <<"\t,\"PanMin\" : " << 0.1 <<"\n";
-				m_logFile <<"\t,\"PanMax\" : " << 0.9 <<"\n";
-				m_logFile <<"\t,\"TiltMin\" : " << 0.1 <<"\n";
-				m_logFile <<"\t,\"TiltMax\" : " << 0.9 <<"\n";
+				std::ostringstream oss;
+				oss <<"\t,\"PanMin\" : " << m_panMin <<"\n";
+				oss <<"\t,\"PanMax\" : " << m_panMax <<"\n";
+				oss <<"\t,\"TiltMin\" : " << m_tiltMin <<"\n";
+				oss <<"\t,\"TiltMax\" : " << m_tiltMax <<"\n";
+				m_logFile << oss.str();
+				m_logFile.flush();
+				m_txt->setText( oss.str() );
+				std::cout << oss.str();
 				m_cycle = 0;
 				m_iteration = 0;
 				++m_calibrationMode;
@@ -152,6 +218,9 @@ struct panTiltCameraCalibration : public FleyePlugin
 			{
 				m_iteration=0; m_cycle=0; ++m_calibrationMode; return;
 			}
+
+			... ajuster divisionSize et ajouter point de départ.
+			verifier que taille X / Y differente supporté
 
 			int posI = posCycle%PositionSteps;
 			int posJ = posCycle/PositionSteps;
@@ -230,6 +299,11 @@ struct panTiltCameraCalibration : public FleyePlugin
 	uint32_t m_calibrationMode;
 	double m_avgSpeed[SpeedTestCycles];
 	double m_controlSpeed;
+	std::vector<float> m_speedRecord;
+	double m_panMin;
+	double m_panMax;
+	double m_tiltMin;
+	double m_tiltMax;
 	double m_dPxdCx[4];
 	double m_dPydCx[4];
 	double m_dPxdCy[4];
