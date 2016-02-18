@@ -16,6 +16,6 @@ foreach(PLUGIN_SRC ${PLUGIN_SOURCE_FILES})
 	get_filename_component(PLUGIN_NAME ${PLUGIN_SRC_NODIR} NAME_WE)
 	add_library(${PLUGIN_NAME} SHARED ${PLUGIN_SRC})
 	target_link_libraries(${PLUGIN_NAME} thirdparty)
-	install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION bin)
+	install(TARGETS ${PLUGIN_NAME} LIBRARY DESTINATION lib/fleye/plugins)
 endforeach(PLUGIN_SRC)
 

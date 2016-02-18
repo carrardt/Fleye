@@ -6,7 +6,7 @@
 #include "../thirdparty/bcm2835.h"
 #include "gpioController.h"
 
-#define GPIO_LOCK_BIT 	26
+#define GPIO_LOCK_BIT 	25
 
 int init_gpio()
 {
@@ -16,7 +16,7 @@ int init_gpio()
     return -1;
   }
 
-  // GPIO 26 for locking data HIGH=data locked, LOW=data can be read
+  // BCM 25 for locking data HIGH=data locked, LOW=data can be read
   bcm2835_gpio_fsel(GPIO_LOCK_BIT, BCM2835_GPIO_FSEL_OUTP);
   bcm2835_gpio_write(GPIO_LOCK_BIT, HIGH);
   
@@ -25,7 +25,6 @@ int init_gpio()
 
 void gpio_set_mode(int i, int mode)
 {
- // reserve GPIO pins for output (2 x 10bits servo + 1 binary for laser)
 	bcm2835_gpio_fsel(i, mode ? BCM2835_GPIO_FSEL_OUTP : BCM2835_GPIO_FSEL_INPT );
 	bcm2835_gpio_write(i, LOW);
 }

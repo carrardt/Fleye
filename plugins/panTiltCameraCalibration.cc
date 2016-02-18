@@ -28,7 +28,7 @@ struct panTiltCameraCalibration : public FleyePlugin
 		, m_txt(0)
 		, m_cycle(0)
 		, m_iteration(0)
-		, m_calibrationMode(1)
+		, m_calibrationMode(0)
 		, m_controlSpeed(0.004)
 		, m_panMin(0.2)
 		, m_panMax(0.8)
@@ -202,6 +202,7 @@ struct panTiltCameraCalibration : public FleyePlugin
 			if(m_iteration=0 && m_cycle==0)
 			{
 				m_logFile<<"\t,\n\t\"CalibrationData\":\n\t[\n";
+				m_logFile.flush();
 			}
 			
 			int posCycle = m_cycle / 2;
@@ -219,17 +220,17 @@ struct panTiltCameraCalibration : public FleyePlugin
 				m_iteration=0; m_cycle=0; ++m_calibrationMode; return;
 			}
 
-			... ajuster divisionSize et ajouter point de départ.
-			verifier que taille X / Y differente supporté
+			double panDivSize = DivisionSize * (m_panMax-m_panMin);
+			double tiltDivSize = DivisionSize * (m_tiltMax-m_tiltMin);
 
 			int posI = posCycle%PositionSteps;
 			int posJ = posCycle/PositionSteps;
 			int iposX = PositionMargin + posI - 1;
 			int iposY = PositionMargin + posJ - 1;
-			double startX = iposX * DivisionSize;
-			double startY = iposY * DivisionSize;
-			double dirX = dirCycle ? 0.0 : 2*DivisionSize;
-			double dirY = dirCycle ? 2*DivisionSize : 0.0;
+			double startX = m_panMin + iposX * panDivSize;
+			double startY = m_tiltMin + iposY * tiltDivSize;
+			double dirX = dirCycle ? 0.0 : 2*panDivSize;
+			double dirY = dirCycle ? 2*tiltDivSize : 0.0;
 			double pathLength = sqrt(dirX*dirX+dirY*dirY);
 			int32_t nbIteration = 30 + static_cast<int32_t>( pathLength / m_controlSpeed );
 			int32_t nbSteps = nbIteration-30;

@@ -8,7 +8,6 @@ project (Fleye)
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 1024x768 -v
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 640x480 -script camera-rgba
 
-
 # Raspberry Pi VideoCore HW Abstraction Layer
 SET(VCROOT "/opt/vc")
 SET(VCINC "${VCROOT}/include")
@@ -20,20 +19,19 @@ SET(GL_INC_DIR ${VCINC} ${VCINC}/interface/vcos/pthreads)
 SET(GL_LIB_DIR "${VCLIB}")
 
 # Resource directories
-SET(GLSL_SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
-SET(SCRIPTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scripts)
-SET(PLUGINS_DIR ${CMAKE_CURRENT_BINARY_DIR}/plugins)
-SET(DATA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+SET(GLSL_SHADER_DIR ${CMAKE_INSTALL_PREFIX}/share/fleye/shaders)
+SET(SCRIPTS_DIR ${CMAKE_INSTALL_PREFIX}/share/fleye/scripts)
+SET(PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/lib/fleye/plugins)
+SET(DATA_DIR ${CMAKE_INSTALL_PREFIX}/share/fleye/data)
 
 add_subdirectory(thirdparty)
 add_subdirectory(plugins)
 add_subdirectory(scripts)
 add_subdirectory(shaders)
-
 add_subdirectory(RaspiCam)
 add_subdirectory(TestCamera)
-
 add_subdirectory(gpio)
+add_subdirectory(data)
 
 find_package(Jsoncpp REQUIRED)
 add_subdirectory(Fleye)
