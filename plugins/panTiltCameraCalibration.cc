@@ -29,7 +29,7 @@ struct panTiltCameraCalibration : public FleyePlugin
 		, m_cycle(0)
 		, m_iteration(0)
 		, m_calibrationMode(0)
-		, m_controlSpeed(0.004)
+		, m_controlSpeed(0.003)
 		, m_panMin(0.2)
 		, m_panMax(0.8)
 		, m_tiltMin(0.2)
@@ -199,8 +199,9 @@ struct panTiltCameraCalibration : public FleyePlugin
 		}
 		else if(m_calibrationMode==2)
 		{
-			if(m_iteration=0 && m_cycle==0)
+			if(m_iteration==0 && m_cycle==0)
 			{
+				
 				m_logFile<<"\t,\n\t\"CalibrationData\":\n\t[\n";
 				m_logFile.flush();
 			}

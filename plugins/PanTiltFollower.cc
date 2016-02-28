@@ -92,6 +92,13 @@ struct PanTiltFollower : public FleyePlugin
 		, m_ncj(0)
 		, m_npi(0)
 		, m_npj(0)
+		, m_panMin(0.2)
+		, m_panMax(0.8)
+		, m_tiltMin(0.2)
+		, m_tiltMax(0.8)
+		, m_latencyFrames(2)
+		, m_frameDelay(0)
+		, m_start(false)
 	{
 	}
 	
@@ -128,6 +135,11 @@ struct PanTiltFollower : public FleyePlugin
 		m_ncj = layout["ControlGridY"].asInt();
 		m_npi = layout["ScreenGridX"].asInt();
 		m_npj = layout["ScreenGridY"].asInt();
+		m_panMin = root["PanMin"].asDouble();
+		m_panMax = root["PanMax"].asDouble();
+		m_tiltMin = root["TiltMin"].asDouble();
+		m_tiltMax = root["TiltMax"].asDouble();
+		std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj;
 		//std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj;
 		m_cgrid.resize( m_nci * m_ncj );
 		
@@ -154,7 +166,7 @@ struct PanTiltFollower : public FleyePlugin
 				m_cgrid[k].sgrid[Pk].dPdCx.y = track["dPydCx"].asDouble();
 				m_cgrid[k].sgrid[Pk].dPdCy.x = track["dPxdCy"].asDouble();
 				m_cgrid[k].sgrid[Pk].dPdCy.y = track["dPydCy"].asDouble();
-				m_cgrid[k].sgrid[Pk].normalize();
+				//m_cgrid[k].sgrid[Pk].normalize();
 				//m_cgrid[k].sgrid[Pk].print();
 			}
 		}
@@ -171,7 +183,7 @@ struct PanTiltFollower : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{
 		// what is the target position of the tracked point
-		const Vec2f target( 0.5f, 0.37f );
+		const Vec2f target( 0.5f, 0.5f );
 
 		float W1 = m_obj1->weight;
 		//float W2 = m_obj2->weight;
@@ -185,6 +197,18 @@ struct PanTiltFollower : public FleyePlugin
 		Vec2f P = P1; //(P1+P2)*0.5f;
 
 		Vec2f dP = target - P;
+		
+		// wait to have an object in the center before starting
+		if( dP.norm() < 0.1 ) { m_start=true; }
+		if( ! m_start ) return;
+		
+		// wait for servo motion latency
+		if( m_frameDelay>0 )
+		{
+			-- m_frameDelay;
+			return;
+		}
+		
 		if( dP.norm2() < 0.0004 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
@@ -241,8 +265,18 @@ struct PanTiltFollower : public FleyePlugin
 					<<"\nnCi="<<ci
 					<<"\nnCj="<<cj;
 
-		m_ptsvc->setPan( m_ptsvc->pan() -nCx*0.05 );
-		m_ptsvc->setTilt( m_ptsvc->tilt() -nCy*0.05 );
+		float targetPan = m_ptsvc->pan() -nCx*0.002;
+		if( targetPan<m_panMin ) targetPan = m_panMin;
+		else if( targetPan>m_panMax ) targetPan = m_panMax;
+		
+		float targetTilt = m_ptsvc->tilt() -nCy*0.002;
+		if( targetTilt<m_tiltMin ) targetTilt = m_tiltMin;
+		else if( targetTilt>m_tiltMax ) targetTilt = m_tiltMax;
+
+		m_ptsvc->setPan( targetPan );
+		m_ptsvc->setTilt( targetTilt );
+		
+		m_frameDelay = m_latencyFrames;
 	}
 
 	PanTiltService* m_ptsvc;
@@ -251,6 +285,9 @@ struct PanTiltFollower : public FleyePlugin
 	TrackedObject* m_obj2;
 	std::vector<CalibrationSample> m_cgrid;
 	int m_nci, m_ncj, m_npi, m_npj;
+	int m_frameDelay, m_latencyFrames;
+	float m_panMin,m_panMax,m_tiltMin,m_tiltMax;
+	bool m_start;
 };
 
 FLEYE_REGISTER_PLUGIN(PanTiltFollower);

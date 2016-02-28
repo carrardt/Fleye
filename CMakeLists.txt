@@ -7,6 +7,8 @@ project (Fleye)
 # optimal resolution/performance
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 1024x768 -v
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 640x480 -script camera-rgba
+# sudo ./Fleye/fleye -awb auto -res 512x512 -geom 512x512 -script panTiltCalibration
+
 
 # Raspberry Pi VideoCore HW Abstraction Layer
 SET(VCROOT "/opt/vc")
