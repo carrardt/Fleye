@@ -98,15 +98,14 @@
     }
     ,
     "ProcessingLoop" : [
-		  "cpu-print-fps" 
-		, "gpu-l2cross-init"
-		, "gpu-l2cross-iteration"
-		, "gpu-l2cross-final"
+		  "cpu-print-fps"
 		, "cpu-l2CrossCenter"
 		, "cpu-follower"
 		, "cpu-pan-tilt"
+		, "gpu-l2cross-init"
+		, "gpu-l2cross-iteration"
+		, "gpu-l2cross-final"
 		, "gpu-display-masking"
-		, "cpu-syncThread"
 		, "gpu-display-fps"
 		, "gpu-display-position"
 		]

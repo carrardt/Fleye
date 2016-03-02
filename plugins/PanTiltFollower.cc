@@ -183,7 +183,7 @@ struct PanTiltFollower : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{
 		// what is the target position of the tracked point
-		const Vec2f target( 0.5f, 0.5f );
+		const Vec2f target( 0.5f, 0.43f );
 
 		float W1 = m_obj1->weight;
 		//float W2 = m_obj2->weight;
@@ -262,8 +262,8 @@ struct PanTiltFollower : public FleyePlugin
 		
 		m_txt->out() <<"nCx="<<nCx
 					<<"\nnCy="<<nCy
-					<<"\nnCi="<<ci
-					<<"\nnCj="<<cj;
+					<<"\ndPx="<<dP.x
+					<<"\ndPy="<<dP.y;
 
 		float targetPan = m_ptsvc->pan() -nCx*0.002;
 		if( targetPan<m_panMin ) targetPan = m_panMin;

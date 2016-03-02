@@ -8,6 +8,8 @@ project (Fleye)
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 1024x768 -v
 # ./Fleye/fleye -ex fixedfps -res 1280x960 -geom 640x480 -script camera-rgba
 # sudo ./Fleye/fleye -awb auto -res 512x512 -geom 512x512 -script panTiltCalibration
+# sudo fleye -ex fixedfps -res 960x720 -geom 960x720 -script objectfollower
+
 
 
 # Raspberry Pi VideoCore HW Abstraction Layer

@@ -25,6 +25,10 @@ int main(int argc, char* argv[])
 		case 'x':
 			gpio_write_bits(X);
 			break;
+			
+		case 'X':
+			gpio_write_bits(X<<5 | Y);
+			break;
 
 		case 't':
 			{
