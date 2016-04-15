@@ -1,6 +1,6 @@
 # compile plugin dynamic libraries
 
-include_directories(.. ../include ${GL_INC_DIR})
+include_directories(.. ../include ${GL_INC_DIR} ${JsonCpp_INCLUDE_DIRS})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_definitions(

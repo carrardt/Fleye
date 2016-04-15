@@ -10,7 +10,11 @@ project (Fleye)
 # sudo ./Fleye/fleye -awb auto -res 512x512 -geom 512x512 -script panTiltCalibration
 # sudo fleye -ex fixedfps -res 960x720 -geom 960x720 -script objectfollower
 
-
+# predefine location of jsoncpp include and libs.
+# needs to install libjsoncpp-dev package
+set( JsonCpp_FOUND 1 )
+set( JsonCpp_INCLUDE_DIRS "/usr/include/jsoncpp" )
+set( JsonCpp_LIBRARIES "/usr/lib/libjsoncpp.so" )
 
 # Raspberry Pi VideoCore HW Abstraction Layer
 SET(VCROOT "/opt/vc")
@@ -37,6 +41,5 @@ add_subdirectory(TestCamera)
 add_subdirectory(gpio)
 add_subdirectory(data)
 
-find_package(Jsoncpp REQUIRED)
 add_subdirectory(Fleye)
 
