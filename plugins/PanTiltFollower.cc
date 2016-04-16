@@ -139,7 +139,7 @@ struct PanTiltFollower : public FleyePlugin
 		m_panMax = root["PanMax"].asDouble();
 		m_tiltMin = root["TiltMin"].asDouble();
 		m_tiltMax = root["TiltMax"].asDouble();
-		std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj;
+		std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj<<"\n";
 		//std::cout<<"nCi="<<m_nci<<" nCj="<<m_ncj<<" nPi="<<m_npi<<" nPj="<<m_npj;
 		m_cgrid.resize( m_nci * m_ncj );
 		

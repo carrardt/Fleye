@@ -75,7 +75,7 @@
 		"cpu-print-fps" : 
 		{ 
 			"plugin" : "printFPS" ,
-			"thread-id" : 1
+			"thread-id" : 2
 		}
 		,
 		"cpu-follower" : 
@@ -93,7 +93,7 @@
 		"cpu-Linkuino" : 
 		{ 
 			"plugin" : "LinkuinoController" ,
-			"thread-id" : 2
+			"thread-id" : 1
 		}
 		,
 		"cpu-syncThread" :
@@ -104,16 +104,17 @@
     }
     ,
     "ProcessingLoop" : [
-		  "cpu-Linkuino"
-		, "cpu-print-fps"
+		  "cpu-print-fps"
 		, "cpu-l2CrossCenter"
 		, "cpu-follower"
 		, "cpu-pan-tilt"
+		, "cpu-Linkuino"
 		, "gpu-l2cross-init"
 		, "gpu-l2cross-iteration"
 		, "gpu-l2cross-final"
 		, "gpu-display-masking"
 		, "gpu-display-fps"
 		, "gpu-display-position"
+		, "cpu-syncThread"
 		]
 }
