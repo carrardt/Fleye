@@ -6,10 +6,14 @@
 #include "../thirdparty/bcm2835.h"
 #include "gpioController.h"
 
+// this is the last accessible bit in GPIO register, reserved for data clock / data lock
 #define GPIO_LOCK_BIT 	25
 
 int init_gpio()
 {
+  static int _initDone = 0;
+  if( _initDone ) return 0;
+  
   if (!bcm2835_init())
   {
     printf("bcm2835_init failed\n");
@@ -20,7 +24,13 @@ int init_gpio()
   bcm2835_gpio_fsel(GPIO_LOCK_BIT, BCM2835_GPIO_FSEL_OUTP);
   bcm2835_gpio_write(GPIO_LOCK_BIT, HIGH);
   
+  _initDone = 1;
   return 0;
+}
+
+int gpio_pin_count()
+{
+	return GPIO_LOCK_BIT;
 }
 
 void gpio_set_mode(int i, int mode)

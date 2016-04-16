@@ -14,7 +14,7 @@ extern int init_gpio();
 extern void gpio_set_mode(int gpioPin, int mode /*1 for output, 0 for input*/ );
 extern void gpio_write_bits(unsigned long gpio_bits);
 extern unsigned long gpio_read_bits(int firstPin, int nPins);
-
+extern int gpio_pin_count();
 #ifdef __cplusplus
 }
 #endif

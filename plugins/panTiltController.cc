@@ -1,34 +1,34 @@
 #include "fleye/plugin.h"
 #include "fleye/FleyeContext.h"
 
-#include "gpio/gpioController.h"
 #include "services/PanTiltService.h"
+#include "services/IOService.h"
 #include <cmath>
 #include <iostream>
 
-#define SERVO_X_VALUE_MIN 0
-#define SERVO_X_VALUE_MAX 1023
-
-#define SERVO_Y_VALUE_MIN 0
-#define SERVO_Y_VALUE_MAX 1023
-
-#define GPIO_AXIS_BITS 	10
-#define GPIO_LASER_BIT 	(2*GPIO_AXIS_BITS)
-#define GPIO_DATA_BITS 	(GPIO_LASER_BIT+1)
-
 struct panTiltController : public FleyePlugin
 {
-	inline panTiltController() : m_ptsvc(0) {}
+	inline panTiltController() : m_ptsvc(0), m_iosvc(0) {}
 	
 	void setup(FleyeContext* ctx)
-	{
-		for(int i=0;i<GPIO_DATA_BITS;i++)
+	{		
+		m_iosvc = IOService_instance();
+		if( m_iosvc->getNumberOfAnalogOutputs() < 2 )
 		{
-			gpio_set_mode(i,OUTPUT_MODE);
+			m_iosvc->setNumberOfAnalogOutputs( 2 );
 		}
+		if( m_iosvc->getNumberOfDigitalOutputs() < 1 )
+		{
+			m_iosvc->setNumberOfDigitalOutputs( 1 );
+		}
+
 		m_ptsvc = PanTiltService_instance();
-		gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), 0);
-		std::cout<<"panTiltController ready, PanTiltService @"<<m_ptsvc<<"\n";
+
+		m_iosvc->setAnalogOutput( 0, m_ptsvc->pan() );
+		m_iosvc->setAnalogOutput( 1, m_ptsvc->tilt() );
+		m_iosvc->setDigitalOutput( 0, false );
+		
+		std::cout<<"panTiltController ready, PanTiltService @"<<m_ptsvc<<", IOService @"<<m_iosvc<<"\n";
 	}
 
 	void run(FleyeContext* ctx,int threadId)
@@ -39,36 +39,13 @@ struct panTiltController : public FleyePlugin
 		 if( m_ptsvc->tilt() < 0.0 ) m_ptsvc->setTilt(0.0);
 		 else if( m_ptsvc->tilt() > 1.0 ) m_ptsvc->setTilt(1.0);
 		 
-		 gpio_write_xy_f( m_ptsvc->pan(), m_ptsvc->tilt(), m_ptsvc->laser() );
+		m_iosvc->setAnalogOutput( 0, m_ptsvc->pan() );
+		m_iosvc->setAnalogOutput( 1, m_ptsvc->tilt() );
+		m_iosvc->setDigitalOutput( 0, m_ptsvc->laser() );
 	}
 	
-	void gpio_write_xy_i(unsigned int xi, unsigned int yi, bool laser)
-	{
-		uint32_t bits;
-		if( xi>=1024 ) xi=1023;
-		if( yi>=1024 ) yi=1023;
-		bits = (yi<<GPIO_AXIS_BITS) | xi ;
-		bits |= laser ? 1UL<<GPIO_LASER_BIT : 0;
-		gpio_write_bits(bits);
-	}
-
-	void gpio_write_xy_f(float xf, float yf, bool laser)
-	{
-		unsigned int xi,yi;
-
-		if(xf<0.0f) xf=0.0f;
-		else if(xf>1.0f) xf=1.0f;
-
-		if(yf<0.0f) yf=0.0f;
-		else if(yf>1.0f) yf=1.0f;
-
-		xi = SERVO_X_VALUE_MIN + (unsigned int)( xf * (SERVO_X_VALUE_MAX-SERVO_X_VALUE_MIN) );
-		yi = SERVO_Y_VALUE_MIN + (unsigned int)( yf * (SERVO_Y_VALUE_MAX-SERVO_Y_VALUE_MIN) );
-
-		gpio_write_xy_i(xi,yi,laser);
-	}
-
 	PanTiltService* m_ptsvc;
+	IOService* m_iosvc;
 };
 
 FLEYE_REGISTER_PLUGIN(panTiltController);

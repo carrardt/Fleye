@@ -1,7 +1,10 @@
 # compile plugin dynamic libraries
 
-include_directories(.. ../include ${GL_INC_DIR} ${JsonCpp_INCLUDE_DIRS})
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(LINKUINO_CLIENT_INCLUDE_DIR "/usr/local/include" CACHE STRING "Where to find Linkuino/LinkuinoClient.h")
+set(LINKUINO_INCLUDE_DIR "/usr/local/include" CACHE STRING "Where to find Linkuino/Linkuino.h")
+
+include_directories(.. ../include ${GL_INC_DIR} ${JsonCpp_INCLUDE_DIRS} ${LINKUINO_CLIENT_INCLUDE_DIR} ${LINKUINO_INCLUDE_DIR} )
+add_compile_options(-std=c++11) # in cmake 2.8.12 and later
 
 add_definitions(
 	-DGLSL_SRC_DIR=\"${GLSL_SHADER_DIR}\"

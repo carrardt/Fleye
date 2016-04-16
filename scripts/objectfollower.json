@@ -1,11 +1,11 @@
 // green / red objects tracking
 // Example usage :
-// ./Fleye/fleye -ex fixedfps -res 960x720 -geom 960x720+32+32 -script l2crosscenter
-// => 18 fps
+// fleye -ex fixedfps -res 960x720 -geom 800x600 -script objectfollower
 {
 	"EnvDefaults" :
 	{
 		  "CCMD" : 5
+		, "SERIAL" : "/dev/ttyAMA0"
 		, "MaskFunc" : "L2CrossRedGreenMask_fs"
 	}
 	,
@@ -69,13 +69,13 @@
     {
 		"cpu-l2CrossCenter" : {
 			"plugin" : "l2CrossCenter" , 
-			"thread-id" : 1 // will schedule multiple instance of this task on every cpu worker thread
+			"thread-id" : 1 
 		}
 		,
 		"cpu-print-fps" : 
 		{ 
 			"plugin" : "printFPS" ,
-			"thread-id" : 2 // scheduled on one thread only, any available one
+			"thread-id" : 1
 		}
 		,
 		"cpu-follower" : 
@@ -90,6 +90,12 @@
 			"thread-id" : 1
 		}
 		,
+		"cpu-Linkuino" : 
+		{ 
+			"plugin" : "LinkuinoController" ,
+			"thread-id" : 2
+		}
+		,
 		"cpu-syncThread" :
 		{ 
 			"plugin" : "syncThread" ,
@@ -98,7 +104,8 @@
     }
     ,
     "ProcessingLoop" : [
-		  "cpu-print-fps"
+		  "cpu-Linkuino"
+		, "cpu-print-fps"
 		, "cpu-l2CrossCenter"
 		, "cpu-follower"
 		, "cpu-pan-tilt"
