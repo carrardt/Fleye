@@ -80,7 +80,8 @@
 		,
 		"cpu-follower" : 
 		{ 
-			"plugin" : "PanTiltFollower" ,
+			//"plugin" : "PanTiltFollower" ,
+			"plugin" : "PanTiltFollowerAdHoc" ,
 			"thread-id" : 1
 		}
 		,

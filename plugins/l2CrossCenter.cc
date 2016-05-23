@@ -159,14 +159,14 @@ struct l2CrossCenter : public FleyePlugin
 
 		if(obj1_count>0)
 		{
-			float W = (float)obj1_count;
-			float wx = (float)obj1_sumx ;
-			float wy = (float)obj1_sumy ;
-			float nx = wx / (float)width;
-			float ny = wy / (float)height;
+			double W = (double)obj1_count;
+			double wx = (double)obj1_sumx ;
+			double wy = (double)obj1_sumy ;
+			double nx = wx / (double)width;
+			double ny = wy / (double)height;
 			obj1->posX = nx ;
 			obj1->posY = ny ;
-			obj1->area = W;
+			obj1->area = W * (1UL<<obj1_L2max);;
 			obj1->weight = W;
 			obj1->timestamp = ctx->frameCounter;
 			//TextService_instance()->console() << "Obj1@"<<obj1->posX<<","<<obj1->posY<<" ";
@@ -174,14 +174,14 @@ struct l2CrossCenter : public FleyePlugin
 
 		if(obj2_count>0)
 		{
-			float W = (float)obj2_count;
-			float wx = (float)obj2_sumx ;
-			float wy = (float)obj2_sumy ;
-			float nx = wx / (float)width;
-			float ny = wy / (float)height;
+			double W = (double)obj2_count;
+			double wx = (double)obj2_sumx ;
+			double wy = (double)obj2_sumy ;
+			double nx = wx / (double)width;
+			double ny = wy / (double)height;
 			obj2->posX = nx ;
 			obj2->posY = ny ;
-			obj2->area = W;
+			obj2->area = W * (1UL<<obj2_L2max);
 			obj2->weight = W;
 			obj2->timestamp = ctx->frameCounter;
 			//TextService_instance()->console() << "Obj2@"<<obj2->posX<<","<<obj2->posY;

@@ -26,7 +26,7 @@ struct panTiltController : public FleyePlugin
 
 		m_iosvc->setAnalogOutput( 0, m_ptsvc->pan() );
 		m_iosvc->setAnalogOutput( 1, m_ptsvc->tilt() );
-		m_iosvc->setDigitalOutput( 0, false );
+		m_iosvc->setDigitalOutput( 3, false ); //TODO: configurable mapping to IOService outputs
 		
 		std::cout<<"panTiltController ready, PanTiltService @"<<m_ptsvc<<", IOService @"<<m_iosvc<<"\n";
 	}
@@ -41,7 +41,7 @@ struct panTiltController : public FleyePlugin
 		 
 		m_iosvc->setAnalogOutput( 0, m_ptsvc->pan() );
 		m_iosvc->setAnalogOutput( 1, m_ptsvc->tilt() );
-		m_iosvc->setDigitalOutput( 0, m_ptsvc->laser() );
+		m_iosvc->setDigitalOutput( 3, m_ptsvc->laser() );
 	}
 	
 	PanTiltService* m_ptsvc;
