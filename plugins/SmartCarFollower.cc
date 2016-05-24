@@ -36,6 +36,9 @@ struct SmartCarFollower : public FleyePlugin
 	void setup(FleyeContext* ctx)
 	{
 		m_ptsvc = PanTiltService_instance();
+		m_ptsvc->setPan( 0.5 );
+		m_ptsvc->setTilt( 0.5 );
+
 		m_obj1 = TrackingService_instance()->getTrackedObject(0);
 		m_obj2 = TrackingService_instance()->getTrackedObject(1);
 		m_txt = TextService_instance()->addPositionnedText(0.1,0.2);
