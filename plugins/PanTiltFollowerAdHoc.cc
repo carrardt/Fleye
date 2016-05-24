@@ -8,12 +8,14 @@
 
 #include "services/MotorDriveService.h"
 
-#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 struct PanTiltFollowerAdHoc : public FleyePlugin
 {
@@ -59,11 +61,26 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		if( m_targetLockedFrames > 120 )
 		{
 			m_targetHorizAngle /= m_targetLockedFrames;
-			m_targetDistance /= m_targetLockedFrames;
+			m_targetDistance /= m_targetLockedFrames;			
 			m_txt->out()<<"angle="<<m_targetHorizAngle<<"\ndistance="<<m_targetDistance;
 			
 			if( m_targetDistance > 0.03f )
 			{
+				if( m_targetHorizAngle < -0.5f ) // turn right
+				{
+					m_motorsvc->setMotorCommand( 0, 2.0f , 0.75f ); // right wheel
+					m_motorsvc->setMotorCommand( 1, 3.0f , 0.5f ); // left wheel					
+				}
+				else if( m_targetHorizAngle > 0.5f ) // turn left
+				{
+					m_motorsvc->setMotorCommand( 0, 3.0f , 0.5f ); // right wheel
+					m_motorsvc->setMotorCommand( 1, 2.0f , 0.75f ); // left wheel
+				}
+				else // go ahead
+				{
+					m_motorsvc->setMotorCommand( 0, 2.0f , 0.5f ); // right wheel
+					m_motorsvc->setMotorCommand( 1, 2.0f , 0.5f ); // left wheel
+				}
 			}
 			
 			m_targetLockedFrames = 0;
@@ -110,7 +127,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		if( dP.norm2() < 0.0004 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
-			this->smartCar( m_ptsvc->pan() - 0.5f , 1024.0f / A2 );
+			this->smartCar( (m_ptsvc->pan() - 0.5f)*M_PI , 1024.0f / A2 );
 			return;
 		}
 		m_targetLockedFrames = 0;
