@@ -29,7 +29,7 @@ struct SmartCarFollower : public FleyePlugin
 		, m_panMax(0.9)
 		, m_tiltMin(0.1)
 		, m_tiltMax(0.9)
-		, m_start(true)
+		, m_start(false)
 	{
 	}
 		
@@ -127,7 +127,7 @@ struct SmartCarFollower : public FleyePlugin
 			return;
 		}
 		
-		if( dP.x < 0.01 )
+		if( std::abs(dP.x) < 0.01 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
 			this->smartCar( (m_ptsvc->pan() - 0.5f)*M_PI , 1024.0f / A2 );
