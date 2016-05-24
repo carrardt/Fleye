@@ -17,9 +17,9 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-struct PanTiltFollowerAdHoc : public FleyePlugin
+struct SmartCarFollower : public FleyePlugin
 {
-	inline PanTiltFollowerAdHoc()
+	inline SmartCarFollower()
 		: m_ptsvc(0)
 		, m_motorsvc(0)
 		, m_txt(0)
@@ -68,19 +68,19 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 			{
 				if( m_targetHorizAngle < -0.5f ) // turn right
 				{
-					std::cout<<"right\n";
+					std::cout<<"Right\n";
 					m_motorsvc->setMotorCommand( 0, 0.0f , 0.5f ); // right wheel
 					m_motorsvc->setMotorCommand( 1, 0.5f , 1.0f ); // left wheel					
 				}
 				else if( m_targetHorizAngle > 0.5f ) // turn left
 				{
-					std::cout<<"left\n";
+					std::cout<<"Left\n";
 					m_motorsvc->setMotorCommand( 0, 0.5f , 1.0f ); // right wheel
-					m_motorsvc->setMotorCommand( 1, 0.0f , 0.5f ); // left wheel
+					m_motorsvc->setMotorCommand( 1, 0.1f , 0.5f ); // left wheel
 				}
 				else // go ahead
 				{
-					std::cout<<"ahead\n";
+					std::cout<<"Ahead\n";
 					m_motorsvc->setMotorCommand( 0, 0.5f , 1.0f ); // right wheel
 					m_motorsvc->setMotorCommand( 1, 0.5f , 1.0f ); // left wheel
 				}
@@ -127,7 +127,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 			return;
 		}
 		
-		if( dP.norm2() < 0.0004 )
+		if( dP.x < 0.01 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
 			this->smartCar( (m_ptsvc->pan() - 0.5f)*M_PI , 1024.0f / A2 );
@@ -168,5 +168,5 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 	bool m_start;
 };
 
-FLEYE_REGISTER_PLUGIN(PanTiltFollowerAdHoc);
+FLEYE_REGISTER_PLUGIN(SmartCarFollower);
 

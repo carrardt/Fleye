@@ -74,7 +74,7 @@ struct LinkuinoController : public FleyePlugin
 		}
 		m_link->setRegisterValue( Linkuino::DOUT_ADDR , bitfield );
 		
-		if( m_motorsvc->getMotorCommand(0).m_targetPosition!=0.0f && m_motorsvc->getMotorCommand(1).m_targetPosition!=0.0f )
+		if( m_motorsvc->getMotorCommand(0).m_targetPosition!=0.0f ||  m_motorsvc->getMotorCommand(1).m_targetPosition!=0.0f )
 		{
 			int tr = m_motorsvc->getMotorCommand(0).m_targetSpeed * 16.0f; // speed in [0;1]
 			int rr = m_motorsvc->getMotorCommand(0).m_targetPosition * 5.0f; // number of rounds
@@ -85,6 +85,7 @@ struct LinkuinoController : public FleyePlugin
 			b = std::max( 0, std::min(rr,255) );
 			c = std::max( 0, std::min(tl,15) );
 			d = std::max( 0, std::min(rl,255) );
+			std::cout<<a<<", "<<b<<", "<<c<<", "<<d<<"\n";
 			uint32_t data = a<<20 | b<<12 | c<<8 | d;
 			uint16_t d0 = (data>>18) & 0x3F;
 			uint16_t d1 = (data>>12) & 0x3F;
