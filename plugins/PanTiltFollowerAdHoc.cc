@@ -6,8 +6,6 @@
 #include "services/TrackingService.h"
 #include "services/TextService.h"
 
-#include "services/MotorDriveService.h"
-
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -17,11 +15,13 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
+// TODO: need a service to configure head tracking :
+// target position, object to track, etc.
+
 struct PanTiltFollowerAdHoc : public FleyePlugin
 {
 	inline PanTiltFollowerAdHoc()
 		: m_ptsvc(0)
-		, m_motorsvc(0)
 		, m_txt(0)
 		, m_obj1(0)
 		, m_obj2(0)
@@ -47,49 +47,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		cobj->posX = 0.5;
 		cobj->posY = 0.5;
 
-		m_motorsvc = MotorDriveService_instance();
-		m_motorsvc->setNumberOfMotors(2);
-
-		std::cout<<"PanTiltFollower ready : MotorDriveService @"<<m_motorsvc<<", PanTiltService @"<<m_ptsvc<<", obj1 @"<<m_obj1<<", obj2 @"<<m_obj2<< "\n";
-	}
-
-	void smartCar(float horiz_angle, float distance)
-	{
-		++ m_targetLockedFrames;
-		m_targetHorizAngle += horiz_angle;
-		m_targetDistance += distance;
-		if( m_targetLockedFrames > 120 )
-		{
-			m_targetHorizAngle /= m_targetLockedFrames;
-			m_targetDistance /= m_targetLockedFrames;			
-			m_txt->out()<<"angle="<<m_targetHorizAngle<<"\ndistance="<<m_targetDistance;
-			
-			if( m_targetDistance > 0.03f )
-			{
-				if( m_targetHorizAngle < -0.5f ) // turn right
-				{
-					std::cout<<"right\n";
-					m_motorsvc->setMotorCommand( 0, 0.0f , 0.5f ); // right wheel
-					m_motorsvc->setMotorCommand( 1, 0.5f , 1.0f ); // left wheel					
-				}
-				else if( m_targetHorizAngle > 0.5f ) // turn left
-				{
-					std::cout<<"left\n";
-					m_motorsvc->setMotorCommand( 0, 0.5f , 1.0f ); // right wheel
-					m_motorsvc->setMotorCommand( 1, 0.0f , 0.5f ); // left wheel
-				}
-				else // go ahead
-				{
-					std::cout<<"ahead\n";
-					m_motorsvc->setMotorCommand( 0, 0.5f , 1.0f ); // right wheel
-					m_motorsvc->setMotorCommand( 1, 0.5f , 1.0f ); // left wheel
-				}
-			}
-			
-			m_targetLockedFrames = 0;
-			m_targetHorizAngle = 0.0f;
-			m_targetDistance=0.0f;			
-		}
+		std::cout<<"PanTiltFollower ready : PanTiltService @"<<m_ptsvc<<", obj1 @"<<m_obj1<<", obj2 @"<<m_obj2<< "\n";
 	}
 
 	void run(FleyeContext* ctx,int threadId)
@@ -116,7 +74,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		// wait to have an object in the center before starting
 		if( dP.norm() < 0.1 )
 		{ 
-			if( ! m_start ) { m_txt->out()<<"Target locked"; }
+			if( ! m_start ) { m_txt->out()<<"Target locked :-)"; }
 			m_start=true;
 		}
 		if( ! m_start ) return;
@@ -130,12 +88,9 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		if( dP.norm2() < 0.0004 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
-			this->smartCar( (m_ptsvc->pan() - 0.5f)*M_PI , 1024.0f / A2 );
 			return;
 		}
-		m_targetLockedFrames = 0;
-		m_targetHorizAngle = 0.0f;
-		m_targetDistance=0.0f;
+
 		m_ptsvc->setLaser( false );
 
 		float cx = m_ptsvc->pan();
@@ -158,13 +113,10 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 	}
 
 	PanTiltService* m_ptsvc;
-	MotorDriveService* m_motorsvc;
 	PositionnedText* m_txt;
 	TrackedObject* m_obj1;
 	TrackedObject* m_obj2;
 	float m_panMin,m_panMax,m_tiltMin,m_tiltMax;
-	float m_targetHorizAngle, m_targetDistance;
-	int m_targetLockedFrames;
 	bool m_start;
 };
 

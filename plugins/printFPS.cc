@@ -4,10 +4,11 @@
 
 #include <sys/time.h>
 #include <sstream>
+#include <algorithm>
 
 struct printFPS : public FleyePlugin
 {
-	printFPS() : time_start(0), lastCount(0), fpsText(0) {}
+	printFPS() : time_start(0), lastCount(0), fpsText(0), m_consoleFPS(false) {}
 
 	void setup(FleyeContext* ctx)
 	{
@@ -15,6 +16,9 @@ struct printFPS : public FleyePlugin
 		fpsText = txtsvc->addPositionnedText(0.8,0.1);
 		//std::cout<<"printFPS: fpsText @"<<fpsText<<"\n";
 		fpsText->setText("? FPS");
+		std::string consoleFPS = ctx->vars["ConsoleFPS"];
+		std::transform(consoleFPS.begin(), consoleFPS.end(), consoleFPS.begin(), ::tolower);
+		m_consoleFPS = ( consoleFPS=="true" || atoi(consoleFPS.c_str())!=0 );
 	}
 
 	void run(FleyeContext* ctx,int threadId)
@@ -39,13 +43,14 @@ struct printFPS : public FleyePlugin
 		  int F = fps*100.0f;
 		  oss<<F*0.01f<<" FPS";
 		  fpsText->setText( oss.str().c_str() );
-		  //std::cout<<oss.str()<<"\n";
+		  if( m_consoleFPS ) { std::cout<<oss.str()<<"\n"; }
 	   }		
 	}
 
 	long long time_start;
 	uint32_t lastCount;
 	PositionnedText* fpsText;
+	bool m_consoleFPS;
 };
 
 FLEYE_REGISTER_PLUGIN(printFPS);

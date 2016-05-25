@@ -1,11 +1,13 @@
 // green / red objects tracking
 // Example usage :
-// fleye -ex fixedfps -res 960x720 -geom 800x600 -script objectfollower
+// fleye -ex fixedfps -res 960x720 -geom 800x600 -script smartcar
+
 {
 	"EnvDefaults" :
 	{
 		  "CCMD" : 5
 		, "SERIAL" : "/dev/ttyAMA0"
+		, "ConsoleFPS" : true
 		, "MaskFunc" : "L2CrossRedGreenMask_fs"
 	}
 	,
@@ -80,7 +82,13 @@
 		,
 		"cpu-follower" : 
 		{ 
-			"plugin" : "SmartCarFollower" ,
+			"plugin" : "PanTiltFollowerAdHoc" ,
+			"thread-id" : 1
+		}
+		,
+		"cpu-car-driver" : 
+		{ 
+			"plugin" : "SmartCar" ,
 			"thread-id" : 1
 		}
 		,
@@ -107,6 +115,7 @@
 		  "cpu-print-fps"
 		, "cpu-l2CrossCenter"
 		, "cpu-follower"
+		, "cpu-car-driver"
 		, "cpu-pan-tilt"
 		, "cpu-Linkuino"
 		, "gpu-l2cross-init"
