@@ -36,6 +36,9 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 	void setup(FleyeContext* ctx)
 	{
 		m_ptsvc = PanTiltService_instance();
+		m_ptsvc->setPan( 0.5f );
+		m_ptsvc->setTilt( 0.5f );
+		
 		m_obj1 = TrackingService_instance()->getTrackedObject(0);
 		m_obj2 = TrackingService_instance()->getTrackedObject(1);
 		m_txt = TextService_instance()->addPositionnedText(0.1,0.2);
@@ -64,7 +67,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		Vec2f P1( m_obj1->posX * S1 , m_obj1->posY * S1 );
 		Vec2f P2( m_obj2->posX * S2 , m_obj2->posY * S2 );
 
-		bool bigEnough = ( A2 > 128.0f );
+		bool bigEnough = ( A2 > 32.0f );
 
 		// this will be the position to track
 		Vec2f P = P2; //P1; //(P1+P2)*0.5f;
@@ -74,7 +77,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		// wait to have an object in the center before starting
 		if( dP.norm() < 0.1 )
 		{ 
-			if( ! m_start ) { m_txt->out()<<"Target locked :-)"; }
+			//if( ! m_start ) { m_txt->out()<<"Target locked :-)"; }
 			m_start=true;
 		}
 		if( ! m_start ) return;
@@ -106,7 +109,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		cy += dP.y * 0.04f;
 		cy = std::max( std::min( cy , tiltMax ) , tiltMin );
 
-		m_txt->out()<<"A1="<<A1<<"\nA2="<<A2;
+		m_txt->out()<<"A1="<<A1<<"\nA2="<<A2<<"\ncx="<<cx<<"\ncy="<<cy;
 
 		m_ptsvc->setPan( cx );
 		m_ptsvc->setTilt( cy );

@@ -98,15 +98,20 @@ struct SmartCar : public FleyePlugin
 		Vec2f P1( m_obj1->posX * S1 , m_obj1->posY * S1 );
 		Vec2f P2( m_obj2->posX * S2 , m_obj2->posY * S2 );
 
-		bool bigEnough = ( A2 > 64.0f );
+		bool bigEnough = ( A2 > 32.0f );
 		
-		if( ! bigEnough ) { return; }
+		if( ! bigEnough )
+		{ 
+			//std::cout<<"object too small\n";
+			return;
+		}
 
 		// this will be the position to track
 		Vec2f P = P2; //P1; //(P1+P2)*0.5f;
 		Vec2f dP = target - P;
 
-		if( std::abs(dP.x) < 0.01 )
+		bool objectCentered = (dP.norm2() < 0.0004) || (std::abs(dP.x) < 0.01) ;
+		if( objectCentered )
 		{
 			float horiz_angle = (m_ptsvc->pan() - 0.5f)*M_PI;
 			float distance = 1024.0f / A2;
@@ -125,6 +130,7 @@ struct SmartCar : public FleyePlugin
 		}
 		else
 		{
+			//std::cout<<"object not centered XDiff="<<std::abs(dP.x)<<" , Norm2="<<dP.norm2() << "\n";
 			m_targetLockedFrames = 0;
 			m_targetHorizAngle = 0.0f;
 			m_targetDistance = 0.0f;

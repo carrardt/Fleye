@@ -166,7 +166,7 @@ struct l2CrossCenterArea : public FleyePlugin
 			double ny = wy / (double)height;
 			obj1->posX = nx ;
 			obj1->posY = ny ;
-			obj1->area = W * (1UL<<obj1_L2max);;
+			obj1->area = W * (1UL<<obj1_L2max);
 			obj1->weight = W;
 			obj1->timestamp = ctx->frameCounter;
 			//TextService_instance()->console() << "Obj1@"<<obj1->posX<<","<<obj1->posY<<" ";
