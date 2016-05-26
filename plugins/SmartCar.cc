@@ -29,8 +29,8 @@ struct SmartCar : public FleyePlugin
 		
 	void setup(FleyeContext* ctx)
 	{
-		m_txt = TextService_instance()->addPositionnedText(0.1,0.4);
-		m_txt->out()<<"Raise !";
+		//m_txt = TextService_instance()->addPositionnedText(0.1,0.4);
+		//m_txt->out()<<"Raise !";
 
 		m_obj1 = TrackingService_instance()->getTrackedObject(0);
 		m_obj2 = TrackingService_instance()->getTrackedObject(1);
@@ -45,28 +45,43 @@ struct SmartCar : public FleyePlugin
 
 	void onStaticObject()
 	{
-		m_txt->out()<<"angle="<<m_targetHorizAngle<<"\ndistance="<<m_targetDistance;
+		std::ostringstream oss;
+		oss<<"angle="<<m_targetHorizAngle<<"\ndistance="<<m_targetDistance;
 		if( m_targetDistance > 0.03f )
 		{
 			if( m_targetHorizAngle < -0.5f ) // turn right
 			{
-				//std::cout<<"Right\n";
-				m_motorsvc->setMotorCommand( 0, 0.0f , 0.5f ); // right wheel
+				oss<<"\nTurn Right";
+				m_motorsvc->setMotorCommand( 0, 0.0f , 0.0f ); // right wheel
 				m_motorsvc->setMotorCommand( 1, 0.5f , 1.0f ); // left wheel					
 			}
+			else if( m_targetHorizAngle < -0.25f ) // turn right
+			{
+				oss<<"\nTurn half-Right";
+				m_motorsvc->setMotorCommand( 0, 0.0f , 0.0f ); // right wheel
+				m_motorsvc->setMotorCommand( 1, 0.25f , 0.75f ); // left wheel					
+			}			
 			else if( m_targetHorizAngle > 0.5f ) // turn left
 			{
-				//std::cout<<"Left\n";
+				oss<<"\nTurn Left";
 				m_motorsvc->setMotorCommand( 0, 0.5f , 1.0f ); // right wheel
-				m_motorsvc->setMotorCommand( 1, 0.1f , 0.5f ); // left wheel
+				m_motorsvc->setMotorCommand( 1, 0.0f , 0.0f ); // left wheel
+			}
+			else if( m_targetHorizAngle > 0.25f ) // turn left
+			{
+				oss<<"\nTurn half-Left";
+				m_motorsvc->setMotorCommand( 0, 0.25f , 0.75f ); // right wheel
+				m_motorsvc->setMotorCommand( 1, 0.0f , 0.0f ); // left wheel
 			}
 			else // go ahead
 			{
-				//std::cout<<"Ahead\n";
-				m_motorsvc->setMotorCommand( 0, 0.75f , 1.0f ); // right wheel
-				m_motorsvc->setMotorCommand( 1, 0.75f , 1.0f ); // left wheel
+				oss<<"\nGo Ahead";
+				m_motorsvc->setMotorCommand( 0, 1.0f , 0.75f ); // right wheel
+				m_motorsvc->setMotorCommand( 1, 1.0f , 0.75f ); // left wheel
 			}
 		}
+		//m_txt->setText( oss.str() );
+		std::cout<<oss.str()<<"\n";
 	}
 
 	void run(FleyeContext* ctx,int threadId)
@@ -83,7 +98,7 @@ struct SmartCar : public FleyePlugin
 		Vec2f P1( m_obj1->posX * S1 , m_obj1->posY * S1 );
 		Vec2f P2( m_obj2->posX * S2 , m_obj2->posY * S2 );
 
-		bool bigEnough = ( A2 > 128.0f );
+		bool bigEnough = ( A2 > 64.0f );
 		
 		if( ! bigEnough ) { return; }
 
