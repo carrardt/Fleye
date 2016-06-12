@@ -25,4 +25,11 @@ struct Vec2f
 	inline Vec2f normalize() const { return *this / norm(); }
 };
 
+template<typename OStream>
+OStream& operator << (OStream& out, const Vec2f& v)
+{
+	out << v.x << ',' << v.y;
+	return out;
+}
+
 #endif

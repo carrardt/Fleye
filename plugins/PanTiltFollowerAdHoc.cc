@@ -87,7 +87,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 			m_txt->out()<<"Target lost :(";
 			return;
 		}
-		
+
 		if( dP.norm2() < 0.0004 )
 		{
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
@@ -101,7 +101,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 
 		cx -= dP.x * 0.04f;
 		cx = std::max( std::min( cx , m_panMax ) , m_panMin );
-		
+
 		float tiltAmpMax = 0.5f - std::abs( 0.5f - ( cx - m_panMin ) / ( m_panMax - m_panMin ) );
 		float tiltMax = (m_tiltMin+m_tiltMax)*0.5f + (m_tiltMax-m_tiltMin)*tiltAmpMax;
 		float tiltMin = (m_tiltMin+m_tiltMax)*0.5f - (m_tiltMax-m_tiltMin)*tiltAmpMax;

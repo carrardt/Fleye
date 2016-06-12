@@ -24,13 +24,14 @@ struct SmartCar : public FleyePlugin
 		, m_obj1(0)
 		, m_obj2(0)
 		, m_txt(0)
+		, m_start(false)
 	{
 	}
 		
 	void setup(FleyeContext* ctx)
 	{
-		//m_txt = TextService_instance()->addPositionnedText(0.1,0.4);
-		//m_txt->out()<<"Raise !";
+		m_txt = TextService_instance()->addPositionnedText(0.1,0.4);
+		m_txt->out()<<"Raise !";
 
 		m_obj1 = TrackingService_instance()->getTrackedObject(0);
 		m_obj2 = TrackingService_instance()->getTrackedObject(1);
@@ -110,8 +111,20 @@ struct SmartCar : public FleyePlugin
 		Vec2f P = P2; //P1; //(P1+P2)*0.5f;
 		Vec2f dP = target - P;
 
-		bool objectCentered = (dP.norm2() < 0.0004) || (std::abs(dP.x) < 0.01) ;
-		if( objectCentered )
+		Vec2f C = Vec2f( m_ptsvc->pan(), m_ptsvc->tilt() );
+		m_speedC = C - m_lastC;
+		m_lastC = C;
+
+		m_txt->out()<<"dP.x="<<dP.x<<"\ndP.y="<<dP.y;
+
+		if(! m_start)
+		{
+			m_start = true;
+			return;
+		}
+
+		bool objectCentered = /*(std::abs(dP.x) < 0.05) &&*/ m_speedC.norm()<0.01;
+		if( objectCentered  )
 		{
 			float horiz_angle = (m_ptsvc->pan() - 0.5f)*M_PI;
 			float distance = 1024.0f / A2;
@@ -143,7 +156,9 @@ struct SmartCar : public FleyePlugin
 	MotorDriveService* m_motorsvc;
 	PositionnedText* m_txt;
 	float m_targetHorizAngle, m_targetDistance;
+	Vec2f m_speedC, m_lastC;
 	int m_targetLockedFrames;
+	bool m_start;
 };
 
 FLEYE_REGISTER_PLUGIN(SmartCar);

@@ -30,6 +30,16 @@ struct LinkuinoController : public FleyePlugin
 			return ;
 		}
 		m_link = new LinkuinoClient(serial_fd);
+		if( m_link->testConnection() )
+		{
+			std::cout<<"Linkuino connected, version ";
+			std::cout<<m_link->getServerVersionMajor()<<'.';
+			std::cout<<m_link->getServerVersionMinor()<<'\n';
+		}
+		else
+		{
+			std::cerr<<"Linkuino connection error\n";
+		}
 		
 		m_iosvc = IOService_instance();
 		m_iosvc->setNumberOfAnalogOutputs( Linkuino::PWM_COUNT );
