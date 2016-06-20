@@ -15,12 +15,16 @@
 
 struct LinkuinoController : public FleyePlugin
 {
-	inline LinkuinoController() : m_iosvc(0), m_motorsvc(0), m_link(0) {}
+	inline LinkuinoController()
+		: m_iosvc(0)
+		, m_motorsvc(0)
+		, m_link(0)
+		{}
 	
 	void setup(FleyeContext* ctx)
 	{
 		std::string serialDevPath = ctx->vars["SERIAL"];
-		if( serialDevPath.empty() ) serialDevPath = "/dev/ttyUSB0";
+		if( serialDevPath.empty() ) serialDevPath = "/dev/ttyAMA0";
 
 		std::cout<<"LinkuinoController: open serial device '"<<serialDevPath<<"'\n";
 		int serial_fd = LinkuinoClient::openSerialDevice( serialDevPath.c_str() );
@@ -39,11 +43,14 @@ struct LinkuinoController : public FleyePlugin
 		else
 		{
 			std::cerr<<"Linkuino connection error\n";
+			delete m_link;
+			m_link = nullptr;
+			return;
 		}
-		
+
 		m_iosvc = IOService_instance();
 		m_iosvc->setNumberOfAnalogOutputs( Linkuino::PWM_COUNT );
-		m_iosvc->setNumberOfDigitalOutputs( 6 );
+		m_iosvc->setNumberOfDigitalOutputs( 5 );
 		
 		m_motorsvc = MotorDriveService_instance();
 		m_motorsvc->setNumberOfMotors(2);
@@ -52,11 +59,12 @@ struct LinkuinoController : public FleyePlugin
 		
 		write_linkuino();
 		
-		std::cout<<"LinkuinoController IOService @"<<m_iosvc<<", MotorDriveService @"<<m_motorsvc<<", LinkuinoClient @"<<m_link<<"\n";
+		std::cout<<"LinkuinoController: IOService @"<<m_iosvc<<", MotorDriveService @"<<m_motorsvc<<", LinkuinoClient @"<<m_link<<"\n";
 	}
 
 	void run(FleyeContext* ctx,int threadId)
 	{
+		if( m_link==nullptr ) { return; }
 		write_linkuino();
 	}
 	
