@@ -12,23 +12,31 @@ struct panTiltController : public FleyePlugin
 		: m_ptsvc(0)
 		, m_iosvc(0)
 		, m_panAnalog(0)
+		, m_panInverse(false)
 		, m_tiltAnalog(1)
+		, m_tiltInverse(false)
 		, m_laserAnalog(2)
 		, m_laserDigital(4)
 		{}
 	
 	void setup(FleyeContext* ctx)
 	{		
-		std::string panAxisStr = ctx->vars["PAN"];
+		std::string panAxisStr = ctx->vars["PAN_CH"];
 		if( ! panAxisStr.empty() ) { m_panAnalog = atoi(panAxisStr.c_str()); }
 		
-		std::string tiltAxisStr = ctx->vars["TILT"];
+		std::string panInverseStr = ctx->vars["PAN_INV"];
+		if( ! panInverseStr.empty() ) { m_panInverse = atoi(panInverseStr.c_str()); }
+
+		std::string tiltAxisStr = ctx->vars["TILT_CH"];
 		if( ! tiltAxisStr.empty() ) { m_tiltAnalog = atoi(tiltAxisStr.c_str()); }
 
-		std::string laserAnalogStr = ctx->vars["LASERA"];
+		std::string tiltInverseStr = ctx->vars["TILT_INV"];
+		if( ! tiltInverseStr.empty() ) { m_tiltInverse = atoi(tiltInverseStr.c_str()); }
+
+		std::string laserAnalogStr = ctx->vars["LASERA_CH"];
 		if( ! laserAnalogStr.empty() ) { m_laserAnalog = atoi(laserAnalogStr.c_str()); }
 
-		std::string laserDigitalStr = ctx->vars["LASERD"];
+		std::string laserDigitalStr = ctx->vars["LASERD_CH"];
 		if( ! laserDigitalStr.empty() ) { m_laserDigital = atoi(laserDigitalStr.c_str()); }
 
 		std::cout<<"panAxis="<<m_panAnalog<<", tiltAxis="<<m_tiltAnalog;
@@ -48,11 +56,15 @@ struct panTiltController : public FleyePlugin
 
 		if( m_panAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
-			m_iosvc->setAnalogOutput( m_panAnalog, m_ptsvc->pan() );
+			float p = m_ptsvc->pan();
+			if( m_panInverse ) p = 1.0f - p;
+			m_iosvc->setAnalogOutput( m_panAnalog, p);
 		}
 		if( m_tiltAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
-			m_iosvc->setAnalogOutput( m_tiltAnalog, m_ptsvc->tilt() );
+			float t = m_ptsvc->tilt();
+			if( m_tiltInverse ) t = 1.0f - t;
+			m_iosvc->setAnalogOutput( m_tiltAnalog, t );
 		}
 		if( m_laserAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
@@ -76,11 +88,17 @@ struct panTiltController : public FleyePlugin
 		 
 		if( m_panAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
-			m_iosvc->setAnalogOutput( m_panAnalog, m_ptsvc->pan() );
+			float p = m_ptsvc->pan();
+			if( m_panInverse ) p = 1.0f - p;
+			//std::cout<<"pan, ch#"<<m_panAnalog<<" = "<<p<<"\n";
+			m_iosvc->setAnalogOutput( m_panAnalog, p );
 		}
 		if( m_tiltAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
-			m_iosvc->setAnalogOutput( m_tiltAnalog, m_ptsvc->tilt() );
+			float t = m_ptsvc->tilt();
+			if( m_tiltInverse ) t = 1.0f - t;
+			//std::cout<<"tilt, ch#"<<m_tiltAnalog<<" = "<<t<<"\n";
+			m_iosvc->setAnalogOutput( m_tiltAnalog, t );
 		}
 		if( m_laserAnalog<m_iosvc->getNumberOfAnalogOutputs() )
 		{
@@ -96,6 +114,7 @@ struct panTiltController : public FleyePlugin
 	PanTiltService* m_ptsvc;
 	IOService* m_iosvc;
 	int m_panAnalog, m_tiltAnalog, m_laserAnalog, m_laserDigital;
+	bool m_panInverse, m_tiltInverse;
 };
 
 FLEYE_REGISTER_PLUGIN(panTiltController);

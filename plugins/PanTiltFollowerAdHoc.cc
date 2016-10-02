@@ -29,12 +29,20 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		, m_panMax(0.9)
 		, m_tiltMin(0.1)
 		, m_tiltMax(0.9)
+		, m_targetOffsetX(0.0f)
+		, m_targetOffsetY(0.0f)
 		, m_start(true)
 	{
 	}
 		
 	void setup(FleyeContext* ctx)
 	{
+		std::string targetOffsetXStr = ctx->vars["TARGET_OFFX"];
+		if( ! targetOffsetXStr.empty() ) { m_targetOffsetX = atoi(targetOffsetXStr.c_str()); }
+
+		std::string targetOffsetYStr = ctx->vars["TARGET_OFFY"];
+		if( ! targetOffsetYStr.empty() ) { m_targetOffsetY = atoi(targetOffsetYStr.c_str()); }
+
 		m_ptsvc = PanTiltService_instance();
 		m_ptsvc->setPan( 0.5f );
 		m_ptsvc->setTilt( 0.5f );
@@ -56,7 +64,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 	void run(FleyeContext* ctx,int threadId)
 	{
 		// what is the target position of the tracked point
-		const Vec2f target( 0.5f, 0.43f );
+		const Vec2f target( 0.5f+m_targetOffsetX, 0.5f+m_targetOffsetY );
 
 		float W1 = m_obj1->weight;
 		float A1 = m_obj1->area;
@@ -78,6 +86,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		if( dP.norm() < 0.1 )
 		{ 
 			//if( ! m_start ) { m_txt->out()<<"Target locked :-)"; }
+			//std::cout<<"target locked\n";
 			m_start=true;
 		}
 		if( ! m_start ) return;
@@ -90,6 +99,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 
 		if( dP.norm2() < 0.0004 )
 		{
+			//std::cout<<"target centered\n";
 			m_ptsvc->setLaser( ! m_ptsvc->laser() );
 			return;
 		}
@@ -99,8 +109,10 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 		float cx = m_ptsvc->pan();
 		float cy = m_ptsvc->tilt();
 
-		cx -= dP.x * 0.04f;
+		//std::cout<<"cx="<<cx<<", dP.x"<<dP.x*0.04f;
+		cx += dP.x * 0.04f;
 		cx = std::max( std::min( cx , m_panMax ) , m_panMin );
+		//std::cout<<", final cx="<<cx<<"\n";
 
 		float tiltAmpMax = 0.5f - std::abs( 0.5f - ( cx - m_panMin ) / ( m_panMax - m_panMin ) );
 		float tiltMax = (m_tiltMin+m_tiltMax)*0.5f + (m_tiltMax-m_tiltMin)*tiltAmpMax;
@@ -119,7 +131,7 @@ struct PanTiltFollowerAdHoc : public FleyePlugin
 	PositionnedText* m_txt;
 	TrackedObject* m_obj1;
 	TrackedObject* m_obj2;
-	float m_panMin,m_panMax,m_tiltMin,m_tiltMax;
+	float m_panMin,m_panMax,m_tiltMin,m_tiltMax, m_targetOffsetX, m_targetOffsetY;
 	bool m_start;
 };
 

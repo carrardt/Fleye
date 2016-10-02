@@ -35,6 +35,7 @@ class IOService : public FleyeService
 	void setAnalogOutput(int i, float x)
 	{
 		if(i<0 || i>=m_analogOutput.size()) return;
+		//std::cout<<"iosvc: Analog #"<<i<<" = "<<x<<"\n";
 		m_analogOutput[i] = x;
 	}
 		

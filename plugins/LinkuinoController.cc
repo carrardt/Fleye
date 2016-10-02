@@ -75,6 +75,7 @@ struct LinkuinoController : public FleyePlugin
 		std::ostringstream oss;
 		for(int i=0;i<na;i++)
 		{
+			//std::cout<<"analog "<<i<<" = "<<m_iosvc->getAnalogOutput(i)<<"\n";
 			int32_t value = m_iosvc->getAnalogOutput(i) * 1500 + 500;
 			if( value < 500 ) value = 500;
 			if( value > 2000 ) value = 2000;

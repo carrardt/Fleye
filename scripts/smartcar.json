@@ -7,10 +7,11 @@
 	{
 		  "CCMD" : 5
 		, "SERIAL" : "/dev/ttyAMA0"
-		, "PAN" : 1
-		, "TILT" : 0
-		, "LASERA" : 2
-		, "LASERD" : 4
+		, "PAN_CH" : 2
+		, "PAN_INV" : 1
+		, "TILT_CH" : 0
+		, "LASERA_CH" : 3
+		, "LASERD_CH" : 4
 		, "ConsoleFPS" : true
 		, "MaskFunc" : "L2CrossRedGreenMask_fs"
 	}
