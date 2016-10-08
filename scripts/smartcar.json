@@ -8,8 +8,10 @@
 		  "CCMD" : 5
 		, "SERIAL" : "/dev/ttyAMA0"
 		, "PAN_CH" : 2
-		, "PAN_INV" : 1
-		, "TILT_CH" : 0
+		, "PAN_INV" : 0
+		, "TILT_CH" : 1
+		, "TILT_INV" : 1
+		
 		, "LASERA_CH" : 3
 		, "LASERD_CH" : 4
 		, "ConsoleFPS" : true
