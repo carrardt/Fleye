@@ -6,6 +6,7 @@
 #include "services/TextService.h"
 #include "services/MotorDriveService.h"
 #include "services/PanTiltService.h"
+#include "services/IOService.h"
 
 #include <iostream>
 #include <sstream>
@@ -20,6 +21,12 @@ struct SmartCar : public FleyePlugin
 {
 	inline SmartCar()
 		: m_ptsvc(0)
+		, m_iosvc(0)
+		, m_rewardAnalog(0)
+		, m_rewardMin(0.433)
+		, m_rewardMax(0.933)
+		, m_rewardState(false)
+		, m_staticObjectCounter(0)
 		, m_motorsvc(0)
 		, m_obj1(0)
 		, m_obj2(0)
@@ -40,8 +47,23 @@ struct SmartCar : public FleyePlugin
 		m_motorsvc->setNumberOfMotors(2);
 
 		m_ptsvc = PanTiltService_instance();
+		
+		m_iosvc = IOService_instance();
+		
+		std::string rewardAxisStr = ctx->vars["REWARD_CH"];
+		if( ! rewardAxisStr.empty() ) { m_rewardAnalog = atoi(rewardAxisStr.c_str()); }		
+		
+		std::string rewardMinStr = ctx->vars["REWARD_MIN"];
+		if( ! rewardMinStr.empty() ) { m_rewardMin = atof(rewardMinStr.c_str()); }		
 
-		std::cout<<"SmartCar ready : MotorDriveService @"<<m_motorsvc<<"\n";
+		std::string rewardMaxStr = ctx->vars["REWARD_MAX"];
+		if( ! rewardMaxStr.empty() ) { m_rewardMax = atof(rewardMaxStr.c_str()); }		
+
+		std::cout<<"SmartCar ready :\n"
+				 <<"\tMotorDriveService @"<<m_motorsvc<<"\n"
+				 <<"\tPanTiltService @"<<m_ptsvc<<"\n"
+				 <<"\tIOService @"<<m_iosvc<<"\n"
+				 <<"\tReward IO config: ch="<<m_rewardAnalog<<", range=["<<m_rewardMin<<';'<<m_rewardMax<<"]\n";
 	}
 
 	void onStaticObject()
@@ -79,6 +101,16 @@ struct SmartCar : public FleyePlugin
 				oss<<"\nGo Ahead";
 				m_motorsvc->setMotorCommand( 0, 1.0f , 0.75f ); // right wheel
 				m_motorsvc->setMotorCommand( 1, 1.0f , 0.75f ); // left wheel
+			}
+			m_staticObjectCounter=0;
+		}
+		else
+		{
+			m_rewardState = !m_rewardState;
+			m_staticObjectCounter=0;
+			if( m_rewardAnalog < m_iosvc->getNumberOfAnalogOutputs() )
+			{
+				m_iosvc->setAnalogOutput( m_rewardAnalog , m_rewardState ? m_rewardMax : m_rewardMin );
 			}
 		}
 		//m_txt->setText( oss.str() );
@@ -154,6 +186,12 @@ struct SmartCar : public FleyePlugin
 	TrackedObject* m_obj1;
 	TrackedObject* m_obj2;
 	MotorDriveService* m_motorsvc;
+	IOService * m_iosvc;
+	int m_rewardAnalog;
+	float m_rewardMin;
+	float m_rewardMax;
+	bool m_rewardState;
+	int m_staticObjectCounter;
 	PositionnedText* m_txt;
 	float m_targetHorizAngle, m_targetDistance;
 	Vec2f m_speedC, m_lastC;

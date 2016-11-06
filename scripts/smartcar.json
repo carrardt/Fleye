@@ -11,9 +11,11 @@
 		, "PAN_INV" : 0
 		, "TILT_CH" : 1
 		, "TILT_INV" : 1
-		
-		, "LASERA_CH" : 3
-		, "LASERD_CH" : 4
+		, "LASERA_CH" : 99
+		, "LASERD_CH" : 99
+		, "REWARD_CH" : 0
+		, "REWARD_MIN" : "0.433"
+		, "REWARD_MAX" : "0.933"
 		, "ConsoleFPS" : true
 		, "MaskFunc" : "L2CrossRedGreenMask_fs"
 	}
